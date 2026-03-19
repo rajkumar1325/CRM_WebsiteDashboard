@@ -19,7 +19,7 @@ const getInitials = (name) => {
 };
 
 const Sidebar = () => {
-  const userName = "Rohan Sharma";
+  const userName = "Raj Kumar";
 
   const [isOpen, setIsOpen] = useState(true);
   const [isSmallScreen, setIsSmallScreen] = useState(false);

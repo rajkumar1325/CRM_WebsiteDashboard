@@ -4,7 +4,9 @@ import { mockData } from "../../MockData/MockData";
 const statusColors = {
   new: "bg-blue-400",
   contacted: "bg-orange-400",
+  qualified: "bg-purple-500",
   converted: "bg-green-500",
+  lost: "bg-red-500",
 };
 
 const dealStatusColors = {

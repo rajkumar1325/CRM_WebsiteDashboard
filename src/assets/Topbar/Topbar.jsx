@@ -98,7 +98,7 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
       {/* 4. Conditionally render the chatbot */}
       {isChatOpen && (
         <div className="absolute top-14 right-16 z-50 shadow-lg rounded-lg">
-           <CRMChatbot />
+           <CRMChatbot embedded={true} />
         </div>
       )}
       

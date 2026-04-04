@@ -135,23 +135,30 @@ const Reports = ({ darkMode }) => {
             ["Total Customers", <CheckCircle className="text-green-500" />],
             ["Deals Won", <TrendingUp className="text-emerald-500" />],
             ["Deals Lost", <TrendingDown className="text-red-500" />],
-          ].map(([title, icon]) => (
-            <div
-              key={title}
-              onClick={() => openModal(title)}
-              className={`${cardBg} cursor-pointer hover:scale-[1.03] transition-transform duration-200 p-5 rounded-2xl shadow flex items-center gap-4`}
-            >
-              {icon}
-              <div>
-                <p className="text-sm text-gray-400">{title}</p>
-                <h2 className="text-2xl font-bold">
-                  {summary[
-                    title.replace(" ", "").replace(" ", "").toLowerCase()
-                  ] || ""}
-                </h2>
+          ].map(([title, icon]) => {
+            // Direct key map to avoid camelCase mismatch bug
+            const keyMap = {
+              "Total Leads": "totalLeads",
+              "Total Customers": "totalCustomers",
+              "Deals Won": "dealsWon",
+              "Deals Lost": "dealsLost",
+            };
+            return (
+              <div
+                key={title}
+                onClick={() => openModal(title)}
+                className={`${cardBg} cursor-pointer hover:scale-[1.03] transition-transform duration-200 p-5 rounded-2xl shadow flex items-center gap-4`}
+              >
+                {icon}
+                <div>
+                  <p className="text-sm text-gray-400">{title}</p>
+                  <h2 className="text-2xl font-bold">
+                    {summary[keyMap[title]] ?? "—"}
+                  </h2>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* SECOND ROW */}

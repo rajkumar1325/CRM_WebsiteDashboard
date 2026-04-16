@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 
+import { mockData, analyticsData, calendarData, dealsData, tasksData, customersData, AGENTS } from "../MockData/MockData";
+
+
 import BellIcon  from "./Icons/bell-notification.svg?react";
 import Setting   from "./Icons/settings.svg?react";
 import Sun       from "./Icons/sun-light.svg?react";
@@ -290,9 +293,11 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
         Pass darkMode + onClose — the panel handles its own layout.
       */}
       {isChatOpen && (
+
         <CRMChatbot
           darkMode={isDark}
-          onClose={() => setIsChatOpen(false)}
+          onClose={close}
+          crmData={{ mockData, analyticsData, calendarData, dealsData, tasksData, customersData, AGENTS }}
         />
       )}
     </>

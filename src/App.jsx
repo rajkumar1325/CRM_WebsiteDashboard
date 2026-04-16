@@ -27,11 +27,11 @@ function App() {
   return (
     <div className="flex w-full h-screen overflow-hidden">
 
-      {/* ✅ Sidebar is always rendered but on mobile it's position:fixed (out of flex flow) */}
+      {/*  Sidebar is always rendered but on mobile it's position:fixed (out of flex flow) */}
       <Sidebar isDark={dark} />
 
-      {/* ✅ main always takes full width on mobile since sidebar is out of flow */}
-      <main className={`flex-1 flex flex-col min-w-0 h-screen overflow-y-auto ${dark ? "bg-[#171821]" : "bg-amber-50"}`}>
+      {/* main always takes full width on mobile since sidebar is out of flow */}
+      <main className={`flex-1 min-w-0 flex flex-col h-screen overflow-y-auto ${dark ? "bg-[#171821]" : "bg-amber-50"}`}>
         <Topbar
           setSearch={setSearch}
           searchPlaceHolder={getPlaceHolder()}

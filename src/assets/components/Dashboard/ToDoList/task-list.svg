@@ -1,1 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?><svg width="24px" stroke-width="1.5" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#541d1d"><path d="M9 6L20 6" stroke="#541d1d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3.80002 5.79999L4.60002 6.59998L6.60001 4.59999" stroke="#541d1d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3.80002 11.8L4.60002 12.6L6.60001 10.6" stroke="#541d1d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3.80002 17.8L4.60002 18.6L6.60001 16.6" stroke="#541d1d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9 12L20 12" stroke="#541d1d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9 18L20 18" stroke="#541d1d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Checklist lines -->
+  <line x1="9" y1="6"  x2="20" y2="6"  />
+  <line x1="9" y1="12" x2="20" y2="12" />
+  <line x1="9" y1="18" x2="20" y2="18" />
+  <!-- Check mark (done) -->
+  <polyline points="4 6 5.5 7.5 8 5" />
+  <!-- Square (pending) -->
+  <rect x="3.5" y="11" width="4" height="4" rx="0.6" />
+  <!-- Dash (empty) -->
+  <line x1="4" y1="18" x2="7.5" y2="18" />
+</svg>

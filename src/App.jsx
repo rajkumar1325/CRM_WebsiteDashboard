@@ -46,7 +46,7 @@ function App() {
             <Route path="/support" element={<Support darkMode={dark} searchQuery={search} />} />
             <Route path="/deals" element={<Deals darkMode={dark} searchQuery={search} />} />
             <Route path="/reports" element={<Reports darkMode={dark} />} />
-            <Route path="/taskAndActivities" element={<Tasks />} />
+            <Route path="/taskAndActivities" element={<Tasks darkMode={dark} />} />
           </Routes>
         </div>
       </main>

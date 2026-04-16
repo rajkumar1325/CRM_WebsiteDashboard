@@ -1,128 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+// ⚠️ ADJUST THIS IMPORT PATH TO MATCH YOUR PROJECT STRUCTURE
+import { tasksData } from "../../MockData/MockData"; 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MOCK DATA — swap out with real Supabase queries when ready
-// ─────────────────────────────────────────────────────────────────────────────
-const INITIAL_TASKS = [
-  {
-    id: 1,
-    title: "Follow up with Mary Johnson",
-    desc: "Send pricing proposal for Q2 deal — she asked for it last call.",
-    type: "follow-up",
-    priority: "high",
-    due: "2025-05-26",
-    lead: "Mary Johnson",
-    company: "Innovate Inc.",
-    done: false,
-  },
-  {
-    id: 2,
-    title: "Schedule demo with Michael Davis",
-    desc: "Tech Corp. is qualified — book a 30-min product walkthrough.",
-    type: "call",
-    priority: "medium",
-    due: "2025-05-27",
-    lead: "Michael Davis",
-    company: "Tech Corp.",
-    done: false,
-  },
-  {
-    id: 3,
-    title: "Review deal: Cloud Migration Service",
-    desc: "Negotiation phase — check TechNova's latest counter-offer.",
-    type: "deal",
-    priority: "high",
-    due: "2025-05-25",
-    lead: "Lucas Martínez",
-    company: "TechNova Ltd.",
-    done: false,
-  },
-  {
-    id: 4,
-    title: "Send onboarding docs to Laura Green",
-    desc: "Converted lead — share welcome kit and access credentials.",
-    type: "email",
-    priority: "low",
-    due: "2025-05-28",
-    lead: "Laura Green",
-    company: "Data Systems",
-    done: true,
-  },
-  {
-    id: 5,
-    title: "Resolve billing error ticket",
-    desc: "Priya Sharma billing dispute is in-progress — follow up with support.",
-    type: "support",
-    priority: "medium",
-    due: "2025-05-26",
-    lead: "Priya Sharma",
-    company: "Sharma Designs",
-    done: false,
-  },
-  {
-    id: 6,
-    title: "Prepare monthly report",
-    desc: "Compile lead conversion and revenue data for May review meeting.",
-    type: "report",
-    priority: "low",
-    due: "2025-05-31",
-    lead: null,
-    company: null,
-    done: false,
-  },
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TYPE CONFIG — explicit dark + light classes so Tailwind purge keeps both
+// TYPE CONFIG (Premium neon-pastel palette for dark mode)
 // ─────────────────────────────────────────────────────────────────────────────
 const TYPE_CONFIG = {
-  "follow-up": {
-    label: "Follow-up",
-    dark:  { bg: "bg-violet-500/20",  text: "text-violet-300" },
-    light: { bg: "bg-violet-100",     text: "text-violet-700" },
-  },
-  call: {
-    label: "Call",
-    dark:  { bg: "bg-emerald-500/20", text: "text-emerald-300" },
-    light: { bg: "bg-emerald-100",    text: "text-emerald-700" },
-  },
-  deal: {
-    label: "Deal",
-    dark:  { bg: "bg-amber-500/20",   text: "text-amber-300"   },
-    light: { bg: "bg-amber-100",      text: "text-amber-700"   },
-  },
-  email: {
-    label: "Email",
-    dark:  { bg: "bg-sky-500/20",     text: "text-sky-300"     },
-    light: { bg: "bg-sky-100",        text: "text-sky-700"     },
-  },
-  support: {
-    label: "Support",
-    dark:  { bg: "bg-rose-500/20",    text: "text-rose-300"    },
-    light: { bg: "bg-rose-100",       text: "text-rose-700"    },
-  },
-  report: {
-    label: "Report",
-    dark:  { bg: "bg-slate-500/20",   text: "text-slate-300"   },
-    light: { bg: "bg-slate-200",      text: "text-slate-600"   },
-  },
+  "follow-up": { label: "Follow-up", dark: { bg: "bg-indigo-500/10 border-indigo-500/20",  text: "text-indigo-400" }, light: { bg: "bg-indigo-100",  text: "text-indigo-700" } },
+  "call":      { label: "Call",      dark: { bg: "bg-emerald-500/10 border-emerald-500/20", text: "text-emerald-400"}, light: { bg: "bg-emerald-100", text: "text-emerald-700"} },
+  "deal":      { label: "Deal",      dark: { bg: "bg-amber-500/10 border-amber-500/20",   text: "text-amber-400"  }, light: { bg: "bg-amber-100",   text: "text-amber-700"  } },
+  "email":     { label: "Email",     dark: { bg: "bg-sky-500/10 border-sky-500/20",     text: "text-sky-400"    }, light: { bg: "bg-sky-100",     text: "text-sky-700"    } },
+  "support":   { label: "Support",   dark: { bg: "bg-rose-500/10 border-rose-500/20",    text: "text-rose-400"   }, light: { bg: "bg-rose-100",    text: "text-rose-700"   } },
+  "report":    { label: "Report",    dark: { bg: "bg-slate-500/10 border-slate-500/20",   text: "text-slate-400"  }, light: { bg: "bg-slate-200",   text: "text-slate-600"  } },
 };
 
-// Priority dot color (works on any bg)
-const PRIORITY_DOT = { high: "bg-rose-500", medium: "bg-amber-400", low: "bg-slate-400" };
-
-// Avatar background colors keyed by first char
-const AVATAR_COLORS = [
-  "bg-violet-500", "bg-emerald-500", "bg-sky-500",
-  "bg-rose-500",   "bg-amber-500",   "bg-teal-500",
-];
+const PRIORITY_COLORS = { 
+  high:   { dot: "bg-rose-500",    bar: "w-full bg-rose-500",     text: "text-rose-400" }, 
+  medium: { dot: "bg-amber-400",   bar: "w-2/3 bg-amber-400",     text: "text-amber-400" }, 
+  low:    { dot: "bg-blue-400",    bar: "w-1/3 bg-blue-400",      text: "text-blue-400" } 
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
-// UTILITY FUNCTIONS
+// UTILITIES & HELPER COMPONENTS
 // ─────────────────────────────────────────────────────────────────────────────
-
 function fmtDate(iso) {
-  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
 function isOverdue(iso, done) {
@@ -130,148 +33,107 @@ function isOverdue(iso, done) {
   return new Date(iso) < new Date(new Date().toDateString());
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// AVATAR — initials circle, consistent color per name
-// ─────────────────────────────────────────────────────────────────────────────
-function Avatar({ name, size = "w-6 h-6", textSize = "text-[9px]" }) {
-  if (!name) return null;
-  const parts    = name.trim().split(" ");
-  const initials = (parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "");
-  const color    = AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
-  return (
-    <span className={`${size} ${color} rounded-full flex items-center justify-center font-bold ${textSize} text-white shrink-0 uppercase`}>
-      {initials}
-    </span>
-  );
-}
+const PremiumCard = ({ children, className = "", darkMode = true, onClick }) => (
+  <div
+    onClick={onClick}
+    className={`
+      rounded-2xl border backdrop-blur-xl transition-all duration-300
+      ${darkMode 
+        ? "bg-[#151921] border-white/[0.06] shadow-[0_4px_24px_rgba(0,0,0,0.1)] hover:border-white/[0.15] hover:bg-[#1A1F29] hover:shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:-translate-y-0.5" 
+        : "bg-white border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-slate-300"}
+      ${className}
+    `}
+  >
+    {children}
+  </div>
+);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TASK CARD — every color class conditional on darkMode prop
+// TASK CARD
 // ─────────────────────────────────────────────────────────────────────────────
-function TaskCard({ task, darkMode, onToggle, onDelete }) {
+function TaskCard({ task, activeTheme, onToggle, onDelete }) {
   const cfg     = TYPE_CONFIG[task.type] ?? TYPE_CONFIG.report;
-  const badge   = darkMode ? cfg.dark : cfg.light;               // badge color scheme
+  const badge   = activeTheme ? cfg.dark : cfg.light;               
   const overdue = isOverdue(task.due, task.done);
+  const prio    = PRIORITY_COLORS[task.priority];
 
-  // Surface color
-  const cardBase = darkMode
-    ? "bg-white/[0.05] border-white/10 hover:bg-white/[0.09] hover:border-white/20 hover:shadow-black/40"
-    : "bg-white border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300";
-
-  const cardDone = darkMode
-    ? "bg-white/[0.02] border-white/5 opacity-40"
-    : "bg-gray-50 border-gray-100 opacity-50";
-
-  // Text colors
-  const titleCls  = darkMode ? "text-white/90" : "text-gray-800";
-  const descCls   = darkMode ? "text-white/40"  : "text-gray-400";
-  const metaCls   = darkMode ? "text-white/35"  : "text-gray-400";
-  const dateCls   = overdue ? "text-rose-500"
-                  : darkMode ? "text-white/30" : "text-gray-400";
-
-  // Checkbox ring color when unchecked
-  const checkRing = darkMode
-    ? "border-white/25 hover:border-white/60"
-    : "border-gray-300 hover:border-violet-500";
-
-  // Delete button
-  const delBg = darkMode
-    ? "bg-white/5 hover:bg-rose-500/20"
-    : "bg-gray-100 hover:bg-rose-100";
-
-  const delStroke = darkMode ? "rgba(255,255,255,0.35)" : "#9ca3af";
+  const titleCls  = activeTheme ? "text-white" : "text-slate-800";
+  const descCls   = activeTheme ? "text-slate-400" : "text-slate-500";
+  const metaCls   = activeTheme ? "text-slate-400" : "text-slate-500";
+  
+  const checkBg = task.done 
+    ? "bg-emerald-500/20 border-emerald-500 text-emerald-400" 
+    : (activeTheme ? "bg-white/5 border-white/20 hover:border-blue-400 text-transparent hover:text-blue-400/30" : "bg-slate-50 border-slate-300 hover:border-blue-500 text-transparent");
 
   return (
-    <div className={`
-      group relative rounded-2xl border transition-all duration-200 p-4 flex gap-3 backdrop-blur-sm
-      ${task.done ? cardDone : cardBase}
-    `}>
-
-      {/* ── Checkbox toggle ── */}
-      <button
-        onClick={() => onToggle(task.id)}
-        aria-label="Toggle done"
-        className={`
-          mt-0.5 w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center
-          transition-all duration-200
-          ${task.done ? "bg-emerald-500 border-emerald-500" : checkRing}
-        `}
-      >
-        {task.done && (
-          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-            <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <PremiumCard darkMode={activeTheme} className={`group relative p-5 flex flex-col h-full ${task.done ? "opacity-60" : ""}`}>
+      
+      <div className="flex items-start gap-3 mb-3">
+        <button onClick={(e) => { e.stopPropagation(); onToggle(task.id); }} className={`mt-0.5 w-6 h-6 rounded-full border-[1.5px] shrink-0 flex items-center justify-center transition-all duration-300 ${checkBg}`}>
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={task.done ? "opacity-100" : "opacity-0 group-hover:opacity-100 transition-opacity"}>
+            <polyline points="2.5 7.5 5.5 10.5 11.5 3.5"></polyline>
           </svg>
-        )}
-      </button>
-
-      {/* ── Content ── */}
-      <div className="flex-1 min-w-0">
-
-        {/* Title + priority dot */}
-        <div className="flex items-start justify-between gap-2">
-          <p className={`font-semibold text-sm leading-snug ${task.done ? `line-through opacity-40 ${titleCls}` : titleCls}`}>
+        </button>
+        <div className="flex-1 min-w-0">
+          <h3 className={`font-bold text-[15px] truncate ${task.done ? "line-through opacity-70" : ""} ${titleCls}`}>
             {task.title}
-          </p>
-          <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${PRIORITY_DOT[task.priority]}`} title={`${task.priority} priority`} />
+          </h3>
         </div>
+        <span className={`shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border ${badge.bg} ${badge.text}`}>
+          {cfg.label}
+        </span>
+      </div>
 
-        {/* Description */}
-        {task.desc && (
-          <p className={`text-xs mt-1 leading-relaxed line-clamp-2 ${descCls}`}>{task.desc}</p>
+      <p className={`text-[13px] leading-relaxed line-clamp-2 mb-4 flex-1 ${descCls}`}>
+        {task.desc || "No additional details provided."}
+      </p>
+
+      <div className={`py-3 border-t border-b ${activeTheme ? "border-white/5" : "border-slate-100"} mb-4`}>
+        {task.lead ? (
+          <div className="flex items-center gap-2">
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${activeTheme ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-700'}`}>
+              {task.lead.charAt(0)}
+            </div>
+            <div className="min-w-0">
+              <p className={`text-xs font-semibold truncate ${activeTheme ? "text-white/90" : "text-slate-700"}`}>{task.lead}</p>
+              <p className={`text-[10px] truncate ${metaCls}`}>{task.company}</p>
+            </div>
+          </div>
+        ) : (
+          <p className={`text-xs italic ${metaCls}`}>Internal Task</p>
         )}
+      </div>
 
-        {/* Meta row */}
-        <div className="flex flex-wrap items-center gap-2 mt-3">
-
-          {/* Type badge */}
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${badge.bg} ${badge.text}`}>
-            {cfg.label}
-          </span>
-
-          {/* Lead avatar + name */}
-          {task.lead && (
-            <span className={`flex items-center gap-1.5 text-[11px] ${metaCls}`}>
-              <Avatar name={task.lead} />
-              {task.lead}
-            </span>
-          )}
-
-          {/* Due date — pushed right */}
-          <span className={`ml-auto text-[11px] font-medium flex items-center gap-1 ${dateCls}`}>
-            {/* Calendar icon */}
-            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" className="shrink-0">
-              <rect x="1" y="2" width="10" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
-              <path d="M1 5h10" stroke="currentColor" strokeWidth="1.3"/>
-              <path d="M4 1v2M8 1v2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-            </svg>
-            {overdue ? "Overdue · " : ""}{fmtDate(task.due)}
-          </span>
+      <div className="flex items-end justify-between mt-auto">
+        <div className="w-1/2">
+          <p className={`text-[10px] font-bold uppercase tracking-wider mb-1.5 ${activeTheme ? "text-slate-500" : "text-slate-400"}`}>Priority</p>
+          <div className={`h-1.5 w-full rounded-full overflow-hidden ${activeTheme ? "bg-white/5" : "bg-slate-100"}`}>
+            <div className={`h-full rounded-full transition-all duration-500 ${prio.bar}`} />
+          </div>
+        </div>
+        
+        <div className="text-right">
+          <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${activeTheme ? "text-slate-500" : "text-slate-400"}`}>Due Date</p>
+          <div className={`flex items-center gap-1.5 text-xs font-semibold ${overdue ? "text-rose-400" : (activeTheme ? "text-white/80" : "text-slate-700")}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${overdue ? "bg-rose-500 animate-pulse" : (activeTheme ? "bg-blue-400" : "bg-blue-500")}`} />
+            {fmtDate(task.due)}
+          </div>
         </div>
       </div>
 
-      {/* ── Delete (hover reveal) ── */}
-      <button
-        onClick={() => onDelete(task.id)}
-        aria-label="Delete task"
-        className={`absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center
-          opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${delBg}`}
-      >
-        <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-          <path d="M2 2l8 8M10 2l-8 8" stroke={delStroke} strokeWidth="1.5" strokeLinecap="round"/>
-        </svg>
+      <button onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} className={`absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg translate-y-1 group-hover:translate-y-0 ${activeTheme ? "bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white" : "bg-rose-100 text-rose-600 hover:bg-rose-500 hover:text-white"}`}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
       </button>
-    </div>
+
+    </PremiumCard>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ADD TASK PANEL — glass panel, colors tied to darkMode prop
+// ADD TASK MODAL 
 // ─────────────────────────────────────────────────────────────────────────────
-function AddTaskPanel({ darkMode, onAdd, onClose }) {
-  const [form, setForm] = useState({
-    title: "", desc: "", type: "follow-up", priority: "medium", due: "",
-  });
-
+function AddTaskModal({ activeTheme, onAdd, onClose }) {
+  const [form, setForm] = useState({ title: "", desc: "", type: "follow-up", priority: "medium", due: "" });
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   function submit() {
@@ -280,100 +142,107 @@ function AddTaskPanel({ darkMode, onAdd, onClose }) {
     onClose();
   }
 
-  // Panel surface
-  const panelCls = darkMode
-    ? "bg-[#0f0f18]/95 border-white/10 shadow-black/60"
-    : "bg-white border-gray-200 shadow-gray-200";
-
-  // Input fields
-  const inputCls = darkMode
-    ? "bg-white/5 border-white/10 text-white/80 placeholder-white/20 focus:border-violet-500/50"
-    : "bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-300 focus:border-violet-400";
-
-  const labelCls = darkMode ? "text-white/40"  : "text-gray-400";
-  const titleCls = darkMode ? "text-white/80"  : "text-gray-700";
-  const cancelCls = darkMode
-    ? "text-white/40 hover:text-white/70"
-    : "text-gray-400 hover:text-gray-600";
-
-  const input = `w-full border rounded-xl px-3 py-2 text-sm outline-none transition-colors ${inputCls}`;
+  const inputCls = activeTheme
+    ? "bg-black/20 border-white/10 text-white placeholder-white/20 focus:border-blue-500/50 focus:bg-black/40"
+    : "bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:border-blue-400 focus:bg-white";
+  const labelCls = activeTheme ? "text-slate-400" : "text-slate-500";
 
   const Field = ({ label, children }) => (
     <div className="flex flex-col gap-1.5">
-      <label className={`text-[11px] font-bold uppercase tracking-wider ${labelCls}`}>{label}</label>
+      <label className={`text-[10px] font-bold uppercase tracking-wider ${labelCls}`}>{label}</label>
       {children}
     </div>
   );
 
   return (
-    <div className={`backdrop-blur-xl border rounded-2xl p-5 shadow-2xl ${panelCls}`}>
-      <p className={`text-sm font-bold mb-4 ${titleCls}`}>New Task</p>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+      <PremiumCard darkMode={activeTheme} className="w-full max-w-lg p-7 shadow-2xl relative">
+        <button onClick={onClose} className={`absolute top-5 right-5 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${activeTheme ? 'bg-white/5 hover:bg-white/10 text-white/60 hover:text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-500'}`}>✕</button>
+        
+        <h2 className={`text-xl font-bold mb-1 ${activeTheme ? "text-white" : "text-slate-800"}`}>Create New Task</h2>
+        <p className={`text-xs mb-6 ${activeTheme ? "text-slate-400" : "text-slate-500"}`}>Add a new actionable item to your pipeline.</p>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="col-span-2">
-          <Field label="Task title">
-            <input className={input} placeholder="e.g. Follow up with client..." value={form.title} onChange={e => set("title", e.target.value)} />
+        <div className="grid grid-cols-2 gap-5">
+          <div className="col-span-2">
+            <Field label="Task Title">
+              <input className={`w-full border rounded-xl px-4 py-2.5 text-sm outline-none transition-all ${inputCls}`} placeholder="e.g. Follow up with client..." value={form.title} onChange={e => set("title", e.target.value)} />
+            </Field>
+          </div>
+
+          <div className="col-span-2">
+            <Field label="Notes & Details">
+              <textarea className={`w-full border rounded-xl px-4 py-2.5 text-sm outline-none transition-all resize-none h-24 ${inputCls}`} placeholder="Optional context..." value={form.desc} onChange={e => set("desc", e.target.value)} />
+            </Field>
+          </div>
+
+          <Field label="Task Type">
+            <select className={`w-full border rounded-xl px-4 py-2.5 text-sm outline-none transition-all ${inputCls}`} value={form.type} onChange={e => set("type", e.target.value)}>
+              {Object.entries(TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+            </select>
           </Field>
+
+          <Field label="Priority Level">
+            <select className={`w-full border rounded-xl px-4 py-2.5 text-sm outline-none transition-all ${inputCls}`} value={form.priority} onChange={e => set("priority", e.target.value)}>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </Field>
+
+          <div className="col-span-2">
+            <Field label="Due Date">
+              <input type="date" className={`w-full border rounded-xl px-4 py-2.5 text-sm outline-none transition-all ${inputCls}`} value={form.due} onChange={e => set("due", e.target.value)} />
+            </Field>
+          </div>
         </div>
 
-        <div className="col-span-2">
-          <Field label="Notes">
-            <textarea className={`${input} resize-none h-16`} placeholder="Optional context..." value={form.desc} onChange={e => set("desc", e.target.value)} />
-          </Field>
+        <div className="flex gap-3 mt-8">
+          <button onClick={submit} className="flex-1 bg-[#60A5FA] hover:bg-[#3B82F6] text-white text-sm font-bold rounded-xl py-3 transition-colors shadow-lg shadow-blue-500/20">
+            Save Task
+          </button>
+          <button onClick={onClose} className={`px-6 text-sm font-bold rounded-xl transition-colors ${activeTheme ? "bg-white/5 hover:bg-white/10 text-white/80" : "bg-slate-100 hover:bg-slate-200 text-slate-700"}`}>
+            Cancel
+          </button>
         </div>
-
-        <Field label="Type">
-          <select className={input} value={form.type} onChange={e => set("type", e.target.value)}>
-            {Object.entries(TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-          </select>
-        </Field>
-
-        <Field label="Priority">
-          <select className={input} value={form.priority} onChange={e => set("priority", e.target.value)}>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
-        </Field>
-
-        <div className="col-span-2">
-          <Field label="Due date">
-            <input type="date" className={input} value={form.due} onChange={e => set("due", e.target.value)} />
-          </Field>
-        </div>
-      </div>
-
-      <div className="flex gap-2 mt-4">
-        <button onClick={submit} className="flex-1 bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold rounded-xl py-2 transition-colors">
-          Add Task
-        </button>
-        <button onClick={onClose} className={`px-4 text-sm transition-colors ${cancelCls}`}>
-          Cancel
-        </button>
-      </div>
+      </PremiumCard>
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MAIN COMPONENT
-// Receives darkMode prop exactly like your Deals, Customers, etc. pages:
-//   <TasksPage darkMode={isDark} searchQuery={query} />
+// MAIN PAGE COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-export default function TasksPage({ darkMode = true, searchQuery = "" }) {
-  const [tasks,      setTasks]      = useState(INITIAL_TASKS);
-  const [filter,     setFilter]     = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [showAdd,    setShowAdd]    = useState(false);
-  const [search,     setSearch]     = useState(searchQuery);
+export default function TasksPage({ darkMode, isDark, searchQuery = "" }) {
+  const activeTheme = darkMode ?? isDark ?? true; 
 
-  // ── Derived counts ────────────────────────────────────────────────────────
+  const [tasks, setTasks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const [filter, setFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [showAdd, setShowAdd] = useState(false);
+  const [search, setSearch] = useState(searchQuery);
+
+  // ── SIMULATED API CALL ──
+  useEffect(() => {
+    const fetchTasks = async () => {
+      setIsLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 500)); 
+      
+      setTasks(tasksData);
+      setIsLoading(false);
+    };
+
+    fetchTasks();
+  }, []);
+
+  // ── Derived counts ──
   const total   = tasks.length;
   const done    = tasks.filter(t => t.done).length;
   const pending = total - done;
   const overdue = tasks.filter(t => isOverdue(t.due, t.done)).length;
 
-  // ── Filter logic ──────────────────────────────────────────────────────────
+  // ── Filter logic ──
   const visible = tasks.filter(t => {
     if (filter === "pending" && t.done)  return false;
     if (filter === "done"    && !t.done) return false;
@@ -383,140 +252,145 @@ export default function TasksPage({ darkMode = true, searchQuery = "" }) {
     return true;
   });
 
-  // ── Mutation handlers ─────────────────────────────────────────────────────
+  // ── Handlers ──
   const toggleDone = id => setTasks(ts => ts.map(t => t.id === id ? { ...t, done: !t.done } : t));
   const deleteTask = id => setTasks(ts => ts.filter(t => t.id !== id));
   const addTask    = t  => setTasks(ts => [t, ...ts]);
 
-  // ── Page-level theme tokens ───────────────────────────────────────────────
-  const pageBg      = darkMode ? "bg-[#0b0b10]"  : "bg-gray-50";
-  const headingCls  = darkMode ? "text-white/90"  : "text-gray-800";
-  const subCls      = darkMode ? "text-white/35"  : "text-gray-400";
-  const statCardCls = darkMode ? "bg-white/[0.04] border-white/8"   : "bg-white border-gray-200";
-  const searchCls   = darkMode
-    ? "bg-white/5 border-white/10 text-white/80 placeholder-white/20 focus:border-violet-500/40"
-    : "bg-white border-gray-200 text-gray-800 placeholder-gray-300 focus:border-violet-400";
-  const searchIconCls = darkMode ? "text-white/25"  : "text-gray-300";
-  const footerCls   = darkMode ? "text-white/20"  : "text-gray-300";
-  const emptyIconCls = darkMode ? "bg-white/5" : "bg-gray-100";
-  const emptyTextCls = darkMode ? "text-white/30" : "text-gray-300";
+  // ── Styles ──
+  const textPrimary = activeTheme ? "text-white" : "text-slate-800";
+  const textSecondary = activeTheme ? "text-slate-300" : "text-slate-600";
+  const textMuted = activeTheme ? "text-slate-500" : "text-slate-400";
+  
+  const searchCls = activeTheme
+    ? "bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-blue-500/50"
+    : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 focus:border-blue-400";
 
-  // Filter pill factory — active = violet, inactive = mode-aware subtle
   const pill = active => `
-    px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer whitespace-nowrap
+    px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer whitespace-nowrap border
     ${active
-      ? "bg-violet-600 text-white shadow-lg shadow-violet-500/25"
-      : darkMode
-        ? "bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/70"
-        : "bg-white text-gray-400 border border-gray-200 hover:bg-gray-100 hover:text-gray-600"
+      ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
+      : activeTheme
+        ? "bg-transparent text-slate-400 border-white/10 hover:bg-white/5 hover:text-white"
+        : "bg-transparent text-slate-500 border-slate-200 hover:bg-slate-50 hover:text-slate-800"
     }
   `;
 
+  if (isLoading) {
+    return (
+      <div className={`w-full min-h-screen flex items-center justify-center ${activeTheme ? "bg-[#0B0F19] text-white" : "bg-slate-50 text-slate-800"}`}>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <p className={textMuted}>Fetching Tasks...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`min-h-screen ${pageBg} px-6 py-8 font-sans transition-colors duration-300`}>
-
-      {/* ── Page header ── */}
-      <div className="flex items-start justify-between mb-8">
-        <div>
-          <h1 className={`text-2xl font-bold tracking-tight ${headingCls}`}>Tasks & Activities</h1>
-          <p className={`text-sm mt-1 ${subCls}`}>Stay on top of your pipeline actions</p>
-        </div>
-        <button
-          onClick={() => setShowAdd(v => !v)}
-          className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors shadow-lg shadow-violet-500/20"
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M7 1v12M1 7h12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-          Add Task
-        </button>
-      </div>
-
-      {/* ── Add task panel ── */}
-      {showAdd && (
-        <div className="mb-6">
-          <AddTaskPanel darkMode={darkMode} onAdd={addTask} onClose={() => setShowAdd(false)} />
-        </div>
-      )}
-
-      {/* ── Stats row ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        {[
-          { label: "Total",   value: total,   color: darkMode ? "text-white/80" : "text-gray-700" },
-          { label: "Pending", value: pending, color: "text-amber-500"   },
-          { label: "Done",    value: done,    color: "text-emerald-500" },
-          { label: "Overdue", value: overdue, color: "text-rose-500"    },
-        ].map(s => (
-          <div key={s.label} className={`border rounded-2xl px-4 py-3 backdrop-blur-sm ${statCardCls}`}>
-            <p className={`text-[11px] font-bold uppercase tracking-widest ${subCls}`}>{s.label}</p>
-            <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
+    <div 
+      className={`min-h-screen font-sans p-8 overflow-x-hidden ${activeTheme ? "bg-[#0B0F19] text-white" : "bg-slate-50 text-slate-800"}`} 
+      style={{ fontFamily: "'DM Sans', 'SF Pro Display', system-ui, sans-serif" }}
+    >
+      <div className="relative z-10 max-w-7xl mx-auto">
+        
+        {/* ── Page header ── */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${textPrimary}`}>
+              Tasks Dashboard
+            </h1>
+            <p className={`text-sm mt-1 ${textMuted}`}>
+              {pending} pending actions • {overdue} overdue
+            </p>
           </div>
-        ))}
-      </div>
-
-      {/* ── Search + filters ── */}
-      <div className="flex flex-wrap items-center gap-3 mb-5">
-        {/* Search */}
-        <div className="relative flex-1 min-w-[200px]">
-          <svg className={`absolute left-3 top-1/2 -translate-y-1/2 ${searchIconCls}`} width="13" height="13" viewBox="0 0 14 14" fill="none">
-            <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.5"/>
-            <path d="M10 10l2.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-          <input
-            className={`w-full border rounded-xl pl-8 pr-3 py-2 text-sm outline-none transition-colors ${searchCls}`}
-            placeholder="Search tasks or leads..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-2 bg-[#60A5FA] hover:bg-[#3B82F6] text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors shadow-lg shadow-blue-500/20"
+          >
+            <span className="text-lg leading-none mb-0.5">+</span> Add Task
+          </button>
         </div>
 
-        {/* Status pills */}
-        <div className="flex gap-2">
-          {[["all","All"],["pending","Pending"],["done","Done"]].map(([v,l]) => (
-            <button key={v} className={pill(filter === v)} onClick={() => setFilter(v)}>{l}</button>
+        {/* ── Add task modal ── */}
+        {showAdd && (
+          <AddTaskModal activeTheme={activeTheme} onAdd={addTask} onClose={() => setShowAdd(false)} />
+        )}
+
+        {/* ── Stats row ── */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {[
+            { label: "Total Tasks", value: total,   icon: "layers", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
+            { label: "Pending",     value: pending, icon: "clock",  color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+            { label: "Completed",   value: done,    icon: "check",  color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+            { label: "Overdue",     value: overdue, icon: "alert",  color: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20" },
+          ].map(s => (
+            <PremiumCard key={s.label} darkMode={activeTheme} className="p-4 flex items-center gap-4">
+               <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${s.bg} ${s.border} ${s.color}`}>
+                 {s.icon === "layers" && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 12 12 17 22 12"></polyline><polyline points="2 17 12 22 22 17"></polyline></svg>}
+                 {s.icon === "clock" && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>}
+                 {s.icon === "check" && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>}
+                 {s.icon === "alert" && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>}
+               </div>
+               <div>
+                  <p className={`text-[10px] font-bold uppercase tracking-widest ${textMuted}`}>{s.label}</p>
+                  <p className={`text-2xl font-bold mt-0.5 ${textPrimary}`}>{s.value}</p>
+               </div>
+            </PremiumCard>
           ))}
         </div>
 
-        {/* Type pills */}
-        <div className="flex gap-2 flex-wrap">
-          <button className={pill(typeFilter === "all")} onClick={() => setTypeFilter("all")}>All types</button>
-          {Object.entries(TYPE_CONFIG).map(([k,v]) => (
-            <button key={k} className={pill(typeFilter === k)} onClick={() => setTypeFilter(k)}>{v.label}</button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Task list ── */}
-      {visible.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${emptyIconCls}`}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="3" width="18" height="18" rx="3" stroke={darkMode ? "rgba(255,255,255,0.2)" : "#d1d5db"} strokeWidth="1.5"/>
-              <path d="M8 12h8M8 8h5M8 16h3" stroke={darkMode ? "rgba(255,255,255,0.2)" : "#d1d5db"} strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
+        {/* ── Filters Row ── */}
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
+          <div className="flex gap-2 bg-transparent">
+            {[["all","All Status"],["pending","Pending"],["done","Completed"]].map(([v,l]) => (
+              <button key={v} className={pill(filter === v)} onClick={() => setFilter(v)}>{l}</button>
+            ))}
           </div>
-          <p className={`text-sm ${emptyTextCls}`}>No tasks match your filters</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {visible.map(task => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              darkMode={darkMode}
-              onToggle={toggleDone}
-              onDelete={deleteTask}
+
+          <div className={`hidden md:block h-6 w-px ${activeTheme ? "bg-white/10" : "bg-slate-200"}`} />
+
+          <div className="flex gap-2 flex-wrap bg-transparent overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
+            <button className={pill(typeFilter === "all")} onClick={() => setTypeFilter("all")}>All Types</button>
+            {Object.entries(TYPE_CONFIG).map(([k,v]) => (
+              <button key={k} className={pill(typeFilter === k)} onClick={() => setTypeFilter(k)}>{v.label}</button>
+            ))}
+          </div>
+
+          <div className="relative md:ml-auto w-full md:w-64">
+            <svg className={`absolute left-3 top-1/2 -translate-y-1/2 ${textMuted}`} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input
+              className={`w-full pl-9 pr-3 py-2 text-sm outline-none transition-colors rounded-xl border ${searchCls}`}
+              placeholder="Search tasks..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
             />
-          ))}
+          </div>
         </div>
-      )}
 
-      {/* ── Footer count ── */}
-      {visible.length > 0 && (
-        <p className={`text-center text-[11px] mt-6 ${footerCls}`}>
-          {visible.length} task{visible.length !== 1 ? "s" : ""} shown
-        </p>
-      )}
+        {/* ── Task Grid ── */}
+        {visible.length === 0 ? (
+          <PremiumCard darkMode={activeTheme} className="flex flex-col items-center justify-center py-24 text-center mt-6">
+            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 border ${activeTheme ? "bg-white/5 border-white/10 text-slate-500" : "bg-slate-50 border-slate-200 text-slate-400"}`}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+            </div>
+            <p className={`text-base font-semibold ${textSecondary}`}>No tasks found</p>
+            <p className={`text-sm mt-1 ${textMuted}`}>Try adjusting your filters or create a new task.</p>
+          </PremiumCard>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {visible.map(task => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                activeTheme={activeTheme}
+                onToggle={toggleDone}
+                onDelete={deleteTask}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -955,3 +955,16 @@ export const CheckBoxData = [
   { id: 4, text: "Prepare proposal for XYZ Corp", completed: false },
   { id: 5, text: "Schedule product demo",         completed: false },
 ];
+
+
+
+
+// ─── Tasks ────────────────────────────────────────────────────────────────────
+export const tasksData = [
+  { id: 1, title: "Follow up with Mary Johnson", desc: "Send pricing proposal for Q2 deal — she asked for it last call.", type: "follow-up", priority: "high", due: "2025-05-26", lead: "Mary Johnson", company: "Innovate Inc.", done: false },
+  { id: 2, title: "Schedule demo with Michael Davis", desc: "Tech Corp. is qualified — book a 30-min product walkthrough.", type: "call", priority: "medium", due: "2025-05-27", lead: "Michael Davis", company: "Tech Corp.", done: false },
+  { id: 3, title: "Review deal: Cloud Migration Service", desc: "Negotiation phase — check TechNova's latest counter-offer.", type: "deal", priority: "high", due: "2025-05-25", lead: "Lucas Martínez", company: "TechNova Ltd.", done: false },
+  { id: 4, title: "Send onboarding docs to Laura Green", desc: "Converted lead — share welcome kit and access credentials.", type: "email", priority: "low", due: "2025-05-28", lead: "Laura Green", company: "Data Systems", done: true },
+  { id: 5, title: "Resolve billing error ticket", desc: "Priya Sharma billing dispute is in-progress — follow up with support.", type: "support", priority: "medium", due: "2025-05-26", lead: "Priya Sharma", company: "Sharma Designs", done: false },
+  { id: 6, title: "Prepare monthly report", desc: "Compile lead conversion and revenue data for May review meeting.", type: "report", priority: "low", due: "2025-05-31", lead: null, company: null, done: false },
+];

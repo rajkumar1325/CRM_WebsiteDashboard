@@ -524,7 +524,7 @@ export default function Cards({ darkMode }) {
 
         {/* Card grid — renders one GlassCard per metric */}
         <div className="cards-grid">
-          {cards.map((card, i) => (
+          {cards.map((card) => (
             <GlassCard
               key={card.label}
               icon={card.icon}

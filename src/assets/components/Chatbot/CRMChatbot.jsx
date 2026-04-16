@@ -1,155 +1,114 @@
 import { useState, useRef, useEffect } from "react";
 
-// ─── CONFIG ────────────────────────────────────────────────────────────────────
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const MODEL = "llama3-8b-8192"; // Free model on Groq
+const MODEL        = "llama3-8b-8192";
 
-const SYSTEM_PROMPT = `You are a helpful CRM assistant. You help users with:
+const SYSTEM_PROMPT = `You are a helpful CRM assistant for CuriumCRM. You help users with:
 - Managing contacts and leads
-- Tracking deals and sales pipeline
+- Tracking deals and sales pipeline  
 - Scheduling follow-ups and tasks
 - Analyzing customer data
 - Writing emails and messages to clients
 Keep responses concise and focused on CRM-related tasks.`;
 
-// ─── ICONS ─────────────────────────────────────────────────────────────────────
-const BotIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/>
-    <path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/>
-  </svg>
-);
-
-const SendIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-  </svg>
-);
-
-const ClearIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-    <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
-  </svg>
-);
-
-// ─── TYPING INDICATOR ──────────────────────────────────────────────────────────
-const TypingIndicator = () => (
-  <div className="flex items-end gap-2 mb-3">
-    <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white flex-shrink-0">
-      <BotIcon />
-    </div>
-    <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
-      <div className="flex gap-1 items-center h-4">
-        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-      </div>
-    </div>
-  </div>
-);
-
-// ─── MESSAGE BUBBLE ────────────────────────────────────────────────────────────
-const MessageBubble = ({ message }) => {
-  const isUser = message.role === "user";
-  const isError = message.isError;
-
-  return (
-    <div className={`flex items-end gap-2 mb-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
-      {/* Avatar */}
-      {!isUser && (
-        <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white flex-shrink-0">
-          <BotIcon />
-        </div>
-      )}
-      {isUser && (
-        <div className="w-7 h-7 rounded-full bg-gray-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-          U
-        </div>
-      )}
-
-      {/* Bubble */}
-      <div
-        className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
-          isUser
-            ? "bg-blue-600 text-white rounded-br-sm"
-            : isError
-            ? "bg-red-50 text-red-700 border border-red-200 rounded-bl-sm"
-            : "bg-white text-gray-800 border border-gray-200 rounded-bl-sm"
-        }`}
-      >
-        <p className="whitespace-pre-wrap">{message.content}</p>
-        <p className={`text-xs mt-1 ${isUser ? "text-blue-200" : "text-gray-400"}`}>
-          {message.time}
-        </p>
-      </div>
-    </div>
-  );
-};
-
-// ─── QUICK SUGGESTIONS ─────────────────────────────────────────────────────────
-const suggestions = [
+// ─── Quick suggestions ────────────────────────────────────────────────────────
+const SUGGESTIONS = [
   "Summarize today's follow-ups",
   "Draft a follow-up email",
   "How to qualify a lead?",
   "Tips to close a deal faster",
 ];
 
-// ─── MAIN CHATBOT COMPONENT ────────────────────────────────────────────────────
-export default function CRMChatbot() {
-  const [isOpen, setIsOpen] = useState(false);
+// ─── Time formatter ───────────────────────────────────────────────────────────
+const fmt = (d) => d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+// ─── Typing indicator ─────────────────────────────────────────────────────────
+function TypingDots({ darkMode }) {
+  return (
+    <div className="flex items-end gap-2 mb-3">
+      <div className="bot-avatar-sm">✧</div>
+      <div className={`typing-bubble ${darkMode ? "bubble-bot-dark" : "bubble-bot-light"}`}>
+        <span className="dot" style={{ animationDelay: "0ms" }} />
+        <span className="dot" style={{ animationDelay: "150ms" }} />
+        <span className="dot" style={{ animationDelay: "300ms" }} />
+      </div>
+    </div>
+  );
+}
+
+// ─── Message bubble ───────────────────────────────────────────────────────────
+function Bubble({ msg, darkMode }) {
+  const isUser  = msg.role === "user";
+  const isError = msg.isError;
+
+  return (
+    <div className={`chat-row ${isUser ? "chat-row-user" : "chat-row-bot"}`}>
+      {/* Avatar */}
+      {!isUser && <div className="bot-avatar-sm">✧</div>}
+      {isUser  && <div className="user-avatar-sm">RK</div>}
+
+      {/* Bubble */}
+      <div className={`
+        chat-bubble
+        ${isUser  ? "bubble-user" : ""}
+        ${!isUser && !isError ? (darkMode ? "bubble-bot-dark" : "bubble-bot-light") : ""}
+        ${isError ? "bubble-error" : ""}
+      `}>
+        <p className="bubble-text">{msg.content}</p>
+        <p className={`bubble-time ${isUser ? "time-user" : (darkMode ? "time-bot-dark" : "time-bot-light")}`}>
+          {msg.time}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Chatbot — exported as EMBEDDED ONLY ─────────────────────────────────
+/**
+ * Props:
+ *  darkMode  — matches app theme
+ *  onClose   — called when user clicks ✕ (Topbar manages open/close state)
+ *
+ * Layout:
+ *  Desktop  → fixed bottom-right glass panel (controlled by Topbar)
+ *  Mobile   → full-screen overlay
+ */
+export default function CRMChatbot({ darkMode = true, onClose }) {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
       content: "Hi! I'm your CRM assistant 👋 Ask me anything about your contacts, deals, or pipeline.",
-      time: formatTime(new Date()),
+      time: fmt(new Date()),
     },
   ]);
-  const [input, setInput] = useState("");
+  const [input,     setInput]     = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
+  const bottomRef  = useRef(null);
+  const inputRef   = useRef(null);
 
-  // Auto-scroll to bottom
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+  // Auto-scroll
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, isLoading]);
 
-  // Focus input when opened
-  useEffect(() => {
-    if (isOpen) setTimeout(() => inputRef.current?.focus(), 100);
-  }, [isOpen]);
+  // Focus input on mount
+  useEffect(() => { setTimeout(() => inputRef.current?.focus(), 120); }, []);
 
-  function formatTime(date) {
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  }
-
-  // ── Send message with streaming ─────────────────────────────────────────────
-  async function sendMessage(text) {
-    const userText = text || input.trim();
+  // ── Send ──────────────────────────────────────────────────────────────────
+  async function send(text) {
+    const userText = (text || input).trim();
     if (!userText || isLoading) return;
-
     setInput("");
-    setError(null);
 
-    const userMsg = { role: "user", content: userText, time: formatTime(new Date()) };
-    const updatedMessages = [...messages, userMsg];
-    setMessages(updatedMessages);
+    const userMsg = { role: "user", content: userText, time: fmt(new Date()) };
+    const history = [...messages, userMsg];
+    setMessages(history);
     setIsLoading(true);
 
-    // Build API conversation history (exclude time/isError fields)
-    const apiMessages = updatedMessages.map(({ role, content }) => ({ role, content }));
+    const apiMsgs = history.map(({ role, content }) => ({ role, content }));
 
     try {
-      const response = await fetch(GROQ_API_URL, {
+      const res = await fetch(GROQ_API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -157,162 +116,300 @@ export default function CRMChatbot() {
         },
         body: JSON.stringify({
           model: MODEL,
-          messages: [{ role: "system", content: SYSTEM_PROMPT }, ...apiMessages],
+          messages: [{ role: "system", content: SYSTEM_PROMPT }, ...apiMsgs],
           max_tokens: 1024,
-          stream: true, // Enable real-time streaming
+          stream: true,
         }),
       });
 
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error?.message || `API Error ${response.status}`);
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error?.message || `API Error ${res.status}`);
       }
 
-      // ── Handle streaming response ──────────────────────────────────────────
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let assistantText = "";
-
-      // Add empty assistant message to fill progressively
+      // Add empty streaming placeholder
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "", time: formatTime(new Date()), streaming: true },
+        { role: "assistant", content: "", time: fmt(new Date()) },
       ]);
       setIsLoading(false);
+
+      const reader  = res.body.getReader();
+      const decoder = new TextDecoder();
+      let text = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n").filter((l) => l.startsWith("data: "));
-
+        const lines = decoder.decode(value, { stream: true }).split("\n").filter((l) => l.startsWith("data: "));
         for (const line of lines) {
           const data = line.replace("data: ", "");
           if (data === "[DONE]") continue;
           try {
-            const json = JSON.parse(data);
-            const delta = json.choices?.[0]?.delta?.content || "";
-            assistantText += delta;
-
-            // Update the last message in real-time
+            const delta = JSON.parse(data).choices?.[0]?.delta?.content || "";
+            text += delta;
             setMessages((prev) => {
               const updated = [...prev];
-              updated[updated.length - 1] = {
-                role: "assistant",
-                content: assistantText,
-                time: formatTime(new Date()),
-                streaming: false,
-              };
+              updated[updated.length - 1] = { role: "assistant", content: text, time: fmt(new Date()) };
               return updated;
             });
-          } catch {
-            // skip malformed chunks
-          }
+          } catch { /* skip malformed */ }
         }
       }
     } catch (err) {
       setIsLoading(false);
-      console.error("Chatbot error:", err);
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: `⚠️ ${err.message || "Something went wrong. Check your API key or network."}`,
-          time: formatTime(new Date()),
-          isError: true,
-        },
+        { role: "assistant", content: `⚠️ ${err.message || "Something went wrong."}`, time: fmt(new Date()), isError: true },
       ]);
     }
   }
 
-  function handleKeyDown(e) {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+  function clearChat() {
+    setMessages([{ role: "assistant", content: "Chat cleared! How can I help you?", time: fmt(new Date()) }]);
   }
 
-  function clearChat() {
-    setMessages([
-      {
-        role: "assistant",
-        content: "Chat cleared! How can I help you with your CRM today?",
-        time: formatTime(new Date()),
-      },
-    ]);
-  }
+  const handleKey = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+  };
 
   return (
     <>
-      {/* ── Floating Toggle Button ── */}
-      <button
-        onClick={() => setIsOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
-        aria-label="Toggle CRM Assistant"
-      >
-        {isOpen ? <CloseIcon /> : <BotIcon />}
-        {/* Notification pulse when closed */}
-        {!isOpen && (
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse" />
-        )}
-      </button>
+      <style>{`
+        /* ── GLASS PANEL ─────────────────────────────────────────────────── */
+        .chat-glass-dark {
+          background: rgba(18, 18, 30, 0.82);
+          border: 1px solid rgba(255,255,255,0.11);
+          backdrop-filter: blur(32px) saturate(180%);
+          -webkit-backdrop-filter: blur(32px) saturate(180%);
+          box-shadow:
+            0 32px 80px rgba(0,0,0,0.55),
+            inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        .chat-glass-light {
+          background: rgba(255,255,255,0.78);
+          border: 1px solid rgba(255,255,255,0.95);
+          backdrop-filter: blur(32px) saturate(180%);
+          -webkit-backdrop-filter: blur(32px) saturate(180%);
+          box-shadow:
+            0 32px 80px rgba(100,100,150,0.18),
+            inset 0 1px 0 rgba(255,255,255,1);
+        }
 
-      {/* ── Chat Window ── */}
+        /* ── HEADER ──────────────────────────────────────────────────────── */
+        .chat-header-dark  { background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .chat-header-light { background: rgba(255,255,255,0.6);  border-bottom: 1px solid rgba(0,0,0,0.07); }
+
+        .chat-title-dark  { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.92); }
+        .chat-title-light { font-size: 13px; font-weight: 600; color: #1a1a2e; }
+
+        .chat-status-dark  { font-size: 10px; color: rgba(255,255,255,0.35); }
+        .chat-status-light { font-size: 10px; color: rgba(30,30,60,0.45); }
+
+        .chat-hbtn {
+          width: 26px; height: 26px; border-radius: 8px; border: none;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 12px; cursor: pointer; transition: background 0.2s;
+        }
+        .chat-hbtn-dark  { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); }
+        .chat-hbtn-dark:hover  { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.9); }
+        .chat-hbtn-light { background: rgba(0,0,0,0.05); color: rgba(30,30,60,0.5); }
+        .chat-hbtn-light:hover { background: rgba(0,0,0,0.1); }
+
+        /* ── MESSAGES AREA ───────────────────────────────────────────────── */
+        .chat-messages {
+          flex: 1; overflow-y: auto; padding: 16px 14px;
+          display: flex; flex-direction: column;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(192,132,252,0.3) transparent;
+        }
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: rgba(192,132,252,0.3); border-radius: 99px; }
+
+        /* ── BUBBLES ─────────────────────────────────────────────────────── */
+        .chat-row      { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 10px; }
+        .chat-row-user { flex-direction: row-reverse; }
+        .chat-row-bot  { flex-direction: row; }
+
+        .bot-avatar-sm {
+          width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+          background: linear-gradient(135deg, #818cf8, #c084fc);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 12px; color: white; font-weight: 700;
+        }
+        .user-avatar-sm {
+          width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+          background: #3b82f6; color: white;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 8px; font-weight: 800;
+        }
+
+        .chat-bubble {
+          max-width: 78%; padding: 9px 12px; border-radius: 16px;
+          font-size: 12.5px; line-height: 1.55;
+        }
+        .bubble-user {
+          background: linear-gradient(135deg, #6366f1, #8b5cf6);
+          color: white; border-bottom-right-radius: 4px;
+        }
+        .bubble-bot-dark  {
+          background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.88);
+          border: 1px solid rgba(255,255,255,0.1); border-bottom-left-radius: 4px;
+        }
+        .bubble-bot-light {
+          background: rgba(255,255,255,0.85); color: #1a1a2e;
+          border: 1px solid rgba(0,0,0,0.08); border-bottom-left-radius: 4px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .bubble-error {
+          background: rgba(248,113,113,0.12); color: #f87171;
+          border: 1px solid rgba(248,113,113,0.25); border-bottom-left-radius: 4px;
+        }
+        .bubble-text { margin: 0; white-space: pre-wrap; }
+        .bubble-time { font-size: 9.5px; margin-top: 4px; opacity: 0.55; }
+        .time-user      { color: rgba(255,255,255,0.7); text-align: right; }
+        .time-bot-dark  { color: rgba(255,255,255,0.3); }
+        .time-bot-light { color: rgba(30,30,60,0.4); }
+
+        /* Typing dots */
+        .typing-bubble {
+          padding: 10px 14px; border-radius: 16px; border-bottom-left-radius: 4px;
+          display: flex; gap: 4px; align-items: center;
+        }
+        .dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: rgba(192,132,252,0.7);
+          animation: dotBounce 1.2s infinite ease-in-out;
+          display: inline-block;
+        }
+        @keyframes dotBounce {
+          0%,80%,100% { transform: translateY(0); opacity: 0.4; }
+          40%          { transform: translateY(-5px); opacity: 1; }
+        }
+
+        /* ── SUGGESTIONS ─────────────────────────────────────────────────── */
+        .suggestions-wrap { padding: 0 14px 10px; display: flex; flex-wrap: wrap; gap: 5px; }
+        .suggestion-btn {
+          font-size: 10.5px; font-weight: 500; padding: 4px 10px; border-radius: 20px;
+          cursor: pointer; transition: all 0.15s; border: none;
+          white-space: nowrap;
+        }
+        .sugg-dark  { background: rgba(192,132,252,0.15); color: #c084fc; border: 1px solid rgba(192,132,252,0.28); }
+        .sugg-light { background: rgba(107,72,255,0.08);  color: #7c3aed; border: 1px solid rgba(107,72,255,0.2); }
+        .sugg-dark:hover  { background: rgba(192,132,252,0.25); }
+        .sugg-light:hover { background: rgba(107,72,255,0.15); }
+
+        /* ── INPUT BAR ───────────────────────────────────────────────────── */
+        .chat-input-wrap {
+          padding: 10px 12px; flex-shrink: 0;
+        }
+        .chat-input-bar-dark  { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-top: 1px solid rgba(255,255,255,0.08); }
+        .chat-input-bar-light { background: rgba(0,0,0,0.025); border-top: 1px solid rgba(0,0,0,0.07); }
+
+        .chat-input-row {
+          display: flex; align-items: flex-end; gap: 8px;
+          padding: 8px 10px; border-radius: 14px;
+        }
+        .chat-input-row-dark  { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+        .chat-input-row-light { background: rgba(255,255,255,0.8);  border: 1px solid rgba(0,0,0,0.09); }
+
+        .chat-textarea {
+          flex: 1; background: transparent; border: none; outline: none;
+          resize: none; font-size: 12.5px; line-height: 1.5;
+          max-height: 80px;
+        }
+        .chat-textarea-dark  { color: rgba(255,255,255,0.88); }
+        .chat-textarea-light { color: #1a1a2e; }
+        .chat-textarea::placeholder { color: rgba(128,128,128,0.5); }
+
+        .chat-send-btn {
+          width: 30px; height: 30px; border-radius: 10px; border: none;
+          background: linear-gradient(135deg, #818cf8, #c084fc);
+          color: white; display: flex; align-items: center; justify-content: center;
+          cursor: pointer; flex-shrink: 0; font-size: 13px;
+          transition: opacity 0.2s, transform 0.1s;
+        }
+        .chat-send-btn:disabled { opacity: 0.35; cursor: default; }
+        .chat-send-btn:not(:disabled):hover { opacity: 0.88; }
+        .chat-send-btn:not(:disabled):active { transform: scale(0.92); }
+
+        .chat-hint {
+          text-align: center; font-size: 9.5px; margin-top: 5px;
+        }
+        .chat-hint-dark  { color: rgba(255,255,255,0.2); }
+        .chat-hint-light { color: rgba(30,30,60,0.3); }
+
+        /* ── ENTRANCE ANIMATION ──────────────────────────────────────────── */
+        @keyframes chatSlideUp {
+          from { opacity: 0; transform: translateY(20px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .chat-entrance { animation: chatSlideUp 0.35s cubic-bezier(0.34,1.4,0.64,1) both; }
+      `}</style>
+
       <div
-        className={`fixed bottom-24 right-6 z-50 w-80 sm:w-96 bg-gray-50 rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden transition-all duration-300 ${
-          isOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-6 pointer-events-none"
-        }`}
-        style={{ height: "520px" }}
+        className={`
+          chat-entrance
+          flex flex-col
+          ${darkMode ? "chat-glass-dark" : "chat-glass-light"}
+          /* ── Desktop: fixed bottom-right panel ── */
+          fixed bottom-6 right-6 z-[200]
+          w-[360px] h-[560px]
+          rounded-2xl overflow-hidden
+          /* ── Mobile: full-screen overlay ── */
+          max-sm:inset-0 max-sm:w-full max-sm:h-full max-sm:rounded-none max-sm:bottom-0 max-sm:right-0
+        `}
       >
-        {/* Header */}
-        <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-              <BotIcon />
-            </div>
+        {/* ── Header ── */}
+        <div className={`flex items-center justify-between px-4 py-3 flex-shrink-0 ${darkMode ? "chat-header-dark" : "chat-header-light"}`}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {/* Gradient bot icon */}
+            <div style={{
+              width: 30, height: 30, borderRadius: 10, flexShrink: 0,
+              background: "linear-gradient(135deg, #818cf8, #c084fc)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 14, color: "white", fontWeight: 700,
+            }}>✧</div>
             <div>
-              <p className="font-semibold text-sm">CRM Assistant</p>
-              <div className="flex items-center gap-1">
-                <span className="w-2 h-2 bg-green-400 rounded-full" />
-                <span className="text-xs text-blue-100">Online · Powered by Groq</span>
+              <p className={darkMode ? "chat-title-dark" : "chat-title-light"}>CRM Assistant</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 1 }}>
+                {/* Green online dot */}
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#34d399", display: "inline-block" }} />
+                <span className={darkMode ? "chat-status-dark" : "chat-status-light"}>Online · Powered by Groq</span>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={clearChat}
-              className="p-1.5 hover:bg-blue-500 rounded-lg transition-colors"
-              title="Clear chat"
-            >
-              <ClearIcon />
+
+          {/* Header actions */}
+          <div style={{ display: "flex", gap: 6 }}>
+            {/* Clear */}
+            <button className={`chat-hbtn ${darkMode ? "chat-hbtn-dark" : "chat-hbtn-light"}`} onClick={clearChat} title="Clear chat">
+              🗑
             </button>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-1.5 hover:bg-blue-500 rounded-lg transition-colors"
-            >
-              <CloseIcon />
+            {/* Close — calls parent onClose */}
+            <button className={`chat-hbtn ${darkMode ? "chat-hbtn-dark" : "chat-hbtn-light"}`} onClick={onClose} title="Close">
+              ✕
             </button>
           </div>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 scroll-smooth">
+        {/* ── Messages ── */}
+        <div className="chat-messages">
           {messages.map((msg, i) => (
-            <MessageBubble key={i} message={msg} />
+            <Bubble key={i} msg={msg} darkMode={darkMode} />
           ))}
-          {isLoading && <TypingIndicator />}
-          <div ref={messagesEndRef} />
+          {isLoading && <TypingDots darkMode={darkMode} />}
+          <div ref={bottomRef} />
         </div>
 
-        {/* Quick Suggestions (shown only at start) */}
+        {/* ── Quick suggestions (shown only initially) ── */}
         {messages.length <= 1 && (
-          <div className="px-4 pb-2 flex flex-wrap gap-1.5">
-            {suggestions.map((s) => (
+          <div className="suggestions-wrap">
+            {SUGGESTIONS.map((s) => (
               <button
                 key={s}
-                onClick={() => sendMessage(s)}
-                className="text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-3 py-1 hover:bg-blue-100 transition-colors"
+                className={`suggestion-btn ${darkMode ? "sugg-dark" : "sugg-light"}`}
+                onClick={() => send(s)}
               >
                 {s}
               </button>
@@ -320,29 +417,28 @@ export default function CRMChatbot() {
           </div>
         )}
 
-        {/* Input Bar */}
-        <div className="px-3 pb-3 pt-2 border-t border-gray-200 bg-white flex-shrink-0">
-          <div className="flex items-end gap-2 bg-gray-100 rounded-xl px-3 py-2">
+        {/* ── Input bar ── */}
+        <div className={`chat-input-wrap ${darkMode ? "chat-input-bar-dark" : "chat-input-bar-light"}`}>
+          <div className={`chat-input-row ${darkMode ? "chat-input-row-dark" : "chat-input-row-light"}`}>
             <textarea
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask about your CRM..."
+              onKeyDown={handleKey}
+              placeholder="Ask about your CRM…"
               rows={1}
-              className="flex-1 bg-transparent text-sm text-gray-800 placeholder-gray-400 resize-none outline-none max-h-24"
-              style={{ lineHeight: "1.5" }}
+              className={`chat-textarea ${darkMode ? "chat-textarea-dark" : "chat-textarea-light"}`}
             />
             <button
-              onClick={() => sendMessage()}
+              className="chat-send-btn"
+              onClick={() => send()}
               disabled={!input.trim() || isLoading}
-              className="w-8 h-8 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-lg flex items-center justify-center transition-colors flex-shrink-0"
             >
-              <SendIcon />
+              ➤
             </button>
           </div>
-          <p className="text-center text-xs text-gray-400 mt-1.5">
-            Press <kbd className="bg-gray-200 px-1 rounded text-gray-500">Enter</kbd> to send · Shift+Enter for newline
+          <p className={`chat-hint ${darkMode ? "chat-hint-dark" : "chat-hint-light"}`}>
+            Enter to send · Shift+Enter for newline
           </p>
         </div>
       </div>

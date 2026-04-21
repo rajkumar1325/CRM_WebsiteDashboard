@@ -1,7 +1,6 @@
 /**
- * AuthCard.jsx — CURIEM CRM Landing
- * ─────────────────────────────────────────────────────────────────
- * The hero-section signup / login card.
+ * AuthCard.jsx — The hero-section signup / login card.
+ * 
  *
  * SECURITY MODEL (important):
  * ─────────────────────────────────────────────────────────────────
@@ -112,7 +111,7 @@ export default function AuthCard({
               onClick={() => setAuthMode(mode)}
               className={`flex-1 py-1.5 rounded-full capitalize transition font-medium
                 ${authMode === mode
-                  ? "bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500 text-black shadow-md"
+                  ? "bg-linear-to-r from-cyan-400 via-indigo-500 to-purple-500 text-black shadow-md"
                   : "text-gray-400 hover:text-white"
                 }`}
             >
@@ -239,7 +238,7 @@ export default function AuthCard({
               flex items-center justify-center gap-2
               ${isSubmitting
                 ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-                : `bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500
+                : `bg-linear-to-r from-cyan-400 via-indigo-500 to-purple-500
                    text-slate-900 shadow-md shadow-cyan-500/40 hover:brightness-110 cursor-pointer`
               }`}
           >

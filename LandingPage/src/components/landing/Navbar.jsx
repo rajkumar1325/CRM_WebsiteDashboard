@@ -18,7 +18,7 @@ const NAV_LINKS = ["features", "pricing", "testimonials", "faq"];
 export default function Navbar({ navScrolled, authMode, onFocusAuth }) {
   return (
     <header
-      className={`sticky top-0 z-40 flex items-center justify-between py-4 transition-all duration-300 ${
+      className={`sticky top-2 z-40 flex items-center justify-between py-4 transition-all duration-300 ${
         navScrolled
           ? "backdrop-blur-md bg-[#050816]/80 border-b border-gray-800/60 shadow-md shadow-black/30"
           : ""
@@ -26,7 +26,7 @@ export default function Navbar({ navScrolled, authMode, onFocusAuth }) {
     >
       {/* ── Logo + brand ── */}
       <div className="flex items-center gap-2.5">
-        <div className="h-9 w-9 rounded-2xl bg-gradient-to-br from-cyan-400 via-indigo-500 to-purple-500
+        <div className="h-9 w-9 rounded-2xl bg-linear-to-br from-cyan-400 via-indigo-500 to-purple-500
           flex items-center justify-center shadow-lg shadow-cyan-500/40 font-bold text-black text-sm">
           CC
         </div>
@@ -47,7 +47,7 @@ export default function Navbar({ navScrolled, authMode, onFocusAuth }) {
             {id}
             {/* Animated underline */}
             <span className="absolute -bottom-0.5 left-0 w-0 group-hover:w-full h-px
-              bg-gradient-to-r from-cyan-400 to-purple-500 transition-all duration-300" />
+              bg-linear-to-r from-cyan-400 to-purple-500 transition-all duration-300" />
           </a>
         ))}
       </nav>
@@ -59,7 +59,7 @@ export default function Navbar({ navScrolled, authMode, onFocusAuth }) {
           className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium
             transition cursor-pointer border
             ${authMode === "login"
-              ? "bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500 text-black border-transparent shadow-md shadow-cyan-500/40"
+              ? "bg-linear-to-r from-cyan-400 via-indigo-500 to-purple-500 text-black border-transparent shadow-md shadow-cyan-500/40"
               : "border-gray-600 text-gray-200 hover:border-cyan-400 hover:text-cyan-300"
             }`}
         >
@@ -70,7 +70,7 @@ export default function Navbar({ navScrolled, authMode, onFocusAuth }) {
           className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium
             transition cursor-pointer
             ${authMode === "signup"
-              ? "bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500 text-black shadow-md shadow-cyan-500/40"
+              ? "bg-linear-to-r from-cyan-400 via-indigo-500 to-purple-500 text-black shadow-md shadow-cyan-500/40"
               : "bg-white text-black hover:opacity-90"
             }`}
         >

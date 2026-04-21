@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+
+@keyframes fade {
+  0%   { opacity: 0; transform: translateY(6px); }
+  10%  { opacity: 1; transform: translateY(0); }   /* fade IN fast */
+  85%  { opacity: 1; transform: translateY(0); }   /* hold visible */
+  100% { opacity: 0; transform: translateY(-6px); } /* fade OUT */
+}
+.animate-testimonial {
+  animation: fade 4500ms ease-in-out forwards;
+}

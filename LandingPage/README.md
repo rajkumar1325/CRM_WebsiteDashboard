@@ -71,8 +71,8 @@ src/
 │       ├── Field.jsx            # Label + input + error wrapper
 │       └── PasswordStrengthBar.jsx  # 4-segment strength indicator
 │
-├── 📦 constants/
-│   └── landingData.js           # All text content — edit here to update the page
+├── 📦 data/
+│   └── landingMockData.js           # All text content — edit here to update the page
 │
 ├── 🛠️ utils/
 │   └── authValidation.js        # Form validation logic

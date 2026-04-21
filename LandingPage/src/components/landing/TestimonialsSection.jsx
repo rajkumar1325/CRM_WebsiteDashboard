@@ -22,6 +22,25 @@ export default function TestimonialsSection() {
     return () => clearInterval(id);
   }, [paused]); // ← only `paused`, NOT `index`
 
+
+
+
+//   useEffect(() => {
+//   console.log("paused:", paused);
+// }, [paused]);
+
+
+// 
+useEffect(() => {
+  console.log(`[${Date.now()}] index changed to:`, index);
+}, [index]);
+
+
+
+// useEffect(() => {
+//   console.log("paused:", paused, "| index:", index);
+// }, [paused, index]);
+
   const prev = () => setIndex((p) => (p === 0 ? TESTIMONIALS.length - 1 : p - 1));
   const next = () => setIndex((p) => (p + 1) % TESTIMONIALS.length);
 
@@ -42,7 +61,8 @@ export default function TestimonialsSection() {
         shadow-md shadow-purple-500/10 max-w-4xl mx-auto">
 
         {/* Slide content — keyed on name so it re-mounts smoothly */}
-        <div key={t.name} className="animate-fade">
+        {/* <div key={t.name} className="animate-fade"> */}
+        <div key={index} className="animate-testimonial">
           {/* Avatar + name */}
           <div className="flex items-center gap-3 mb-4">
             <div className={`h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gradient-to-br

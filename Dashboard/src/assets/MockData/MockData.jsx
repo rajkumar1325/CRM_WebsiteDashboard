@@ -968,3 +968,140 @@ export const tasksData = [
   { id: 5, title: "Resolve billing error ticket", desc: "Priya Sharma billing dispute is in-progress — follow up with support.", type: "support", priority: "medium", due: "2025-05-26", lead: "Priya Sharma", company: "Sharma Designs", done: false },
   { id: 6, title: "Prepare monthly report", desc: "Compile lead conversion and revenue data for May review meeting.", type: "report", priority: "low", due: "2025-05-31", lead: null, company: null, done: false },
 ];
+
+
+
+
+
+
+// ─── PROJECT DATA ──────────────────────────────────────────────────────────────
+// Structure mirrors the EER diagram:
+// projects { id, name, startDate, endDate, status, clientId, originatorId, dealValue }
+// tasks    { id, projectId, name, status, startDate, endDate, implementers[] }
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const projectsData = [
+  {
+    id: "PROJ-001",
+    name: "Website Redesign",
+    description: "Complete overhaul of corporate website with modern UI/UX and CMS integration.",
+    startDate: "2025-01-10",
+    endDate: "2025-04-30",
+    status: "Completed",
+    clientId: "CUST-1001",      // John Doe — Acme Corp
+    originatorId: "USR-01",
+    originator: "Sarah Kim",
+    dealValue: 12000,
+    tasks: [
+      { id: "T-001", name: "Wireframe Design",       status: "completed", startDate: "2025-01-10", endDate: "2025-01-20", implementers: ["Sarah Kim",   "Priya Sharma"] },
+      { id: "T-002", name: "Frontend Development",   status: "completed", startDate: "2025-01-21", endDate: "2025-03-10", implementers: ["Lucas Martínez"] },
+      { id: "T-003", name: "Backend Integration",    status: "completed", startDate: "2025-02-15", endDate: "2025-03-25", implementers: ["Lucas Martínez", "John Doe"] },
+      { id: "T-004", name: "QA & Testing",           status: "completed", startDate: "2025-03-26", endDate: "2025-04-15", implementers: ["Sarah Kim"] },
+      { id: "T-005", name: "Deployment & Handover",  status: "completed", startDate: "2025-04-16", endDate: "2025-04-30", implementers: ["John Doe"] },
+    ],
+  },
+
+  {
+    id: "PROJ-002",
+    name: "Cloud Migration",
+    description: "Migrate on-premise infrastructure to AWS cloud for scalability and cost efficiency.",
+    startDate: "2025-03-01",
+    endDate: "2025-08-31",
+    status: "Active",
+    clientId: "CUST-1004",      // Lucas Martínez — TechNova Ltd.
+    originatorId: "USR-02",
+    originator: "John Doe",
+    dealValue: 35000,
+    tasks: [
+      { id: "T-006", name: "Infrastructure Audit",   status: "completed",   startDate: "2025-03-01", endDate: "2025-03-15", implementers: ["John Doe"] },
+      { id: "T-007", name: "AWS Architecture Design",status: "completed",   startDate: "2025-03-16", endDate: "2025-04-05", implementers: ["John Doe", "Lucas Martínez"] },
+      { id: "T-008", name: "Data Migration Phase 1", status: "in_progress", startDate: "2025-04-06", endDate: "2025-06-01", implementers: ["Lucas Martínez"] },
+      { id: "T-009", name: "Security Configuration", status: "in_progress", startDate: "2025-05-01", endDate: "2025-06-30", implementers: ["Sarah Kim"] },
+      { id: "T-010", name: "Testing & Validation",   status: "pending",     startDate: "2025-07-01", endDate: "2025-08-15", implementers: ["John Doe", "Sarah Kim"] },
+      { id: "T-011", name: "Go-Live & Monitoring",   status: "pending",     startDate: "2025-08-16", endDate: "2025-08-31", implementers: ["John Doe"] },
+    ],
+  },
+
+  {
+    id: "PROJ-003",
+    name: "CRM Analytics Dashboard",
+    description: "Custom analytics dashboard with real-time KPI tracking, charts, and automated reports.",
+    startDate: "2025-05-01",
+    endDate: "2025-09-30",
+    status: "Active",
+    clientId: "CUST-1007",      // Mona Das — Neon Industries
+    originatorId: "USR-03",
+    originator: "Priya Sharma",
+    dealValue: 18000,
+    tasks: [
+      { id: "T-012", name: "Requirements Gathering", status: "completed",   startDate: "2025-05-01", endDate: "2025-05-10", implementers: ["Priya Sharma"] },
+      { id: "T-013", name: "UI Design (Figma)",       status: "completed",   startDate: "2025-05-11", endDate: "2025-05-28", implementers: ["Priya Sharma", "Sarah Kim"] },
+      { id: "T-014", name: "React Dashboard Build",  status: "in_progress", startDate: "2025-06-01", endDate: "2025-07-31", implementers: ["Lucas Martínez"] },
+      { id: "T-015", name: "API Integration",        status: "in_progress", startDate: "2025-07-01", endDate: "2025-08-20", implementers: ["John Doe"] },
+      { id: "T-016", name: "Report Automation",      status: "pending",     startDate: "2025-08-21", endDate: "2025-09-15", implementers: ["Priya Sharma"] },
+      { id: "T-017", name: "UAT & Sign-off",         status: "pending",     startDate: "2025-09-16", endDate: "2025-09-30", implementers: ["Sarah Kim", "Priya Sharma"] },
+    ],
+  },
+
+  {
+    id: "PROJ-004",
+    name: "Mobile App Development",
+    description: "Cross-platform mobile app for customer self-service portal — React Native + Spring Boot.",
+    startDate: "2025-06-01",
+    endDate: "2026-01-31",
+    status: "Active",
+    clientId: "CUST-1005",      // Emma Wilson — GreenLeaf
+    originatorId: "USR-01",
+    originator: "Sarah Kim",
+    dealValue: 55000,
+    tasks: [
+      { id: "T-018", name: "Project Kickoff",        status: "completed",   startDate: "2025-06-01", endDate: "2025-06-05", implementers: ["Sarah Kim"] },
+      { id: "T-019", name: "App Architecture",       status: "completed",   startDate: "2025-06-06", endDate: "2025-06-25", implementers: ["Lucas Martínez", "John Doe"] },
+      { id: "T-020", name: "UI/UX Prototype",        status: "completed",   startDate: "2025-06-26", endDate: "2025-07-20", implementers: ["Priya Sharma"] },
+      { id: "T-021", name: "Core Feature Dev",       status: "in_progress", startDate: "2025-07-21", endDate: "2025-10-31", implementers: ["Lucas Martínez"] },
+      { id: "T-022", name: "Backend APIs",           status: "in_progress", startDate: "2025-08-01", endDate: "2025-11-15", implementers: ["John Doe"] },
+      { id: "T-023", name: "Integration Testing",    status: "pending",     startDate: "2025-11-16", endDate: "2025-12-31", implementers: ["Sarah Kim", "Lucas Martínez"] },
+      { id: "T-024", name: "App Store Submission",   status: "pending",     startDate: "2026-01-01", endDate: "2026-01-31", implementers: ["Priya Sharma"] },
+    ],
+  },
+
+  {
+    id: "PROJ-005",
+    name: "ERP Implementation",
+    description: "Full ERP rollout covering HR, Finance, Inventory and Procurement modules.",
+    startDate: "2024-09-01",
+    endDate: "2025-03-31",
+    status: "Completed",
+    clientId: "CUST-1016",      // Kabir Nayak — Workcation
+    originatorId: "USR-02",
+    originator: "John Doe",
+    dealValue: 80000,
+    tasks: [
+      { id: "T-025", name: "Business Analysis",      status: "completed", startDate: "2024-09-01", endDate: "2024-09-30", implementers: ["John Doe", "Priya Sharma"] },
+      { id: "T-026", name: "System Configuration",   status: "completed", startDate: "2024-10-01", endDate: "2024-11-30", implementers: ["Lucas Martínez"] },
+      { id: "T-027", name: "Data Migration",         status: "completed", startDate: "2024-12-01", endDate: "2024-12-31", implementers: ["John Doe"] },
+      { id: "T-028", name: "User Training",          status: "completed", startDate: "2025-01-01", endDate: "2025-02-28", implementers: ["Sarah Kim", "Priya Sharma"] },
+      { id: "T-029", name: "Go-Live Support",        status: "completed", startDate: "2025-03-01", endDate: "2025-03-31", implementers: ["John Doe", "Sarah Kim"] },
+    ],
+  },
+
+  {
+    id: "PROJ-006",
+    name: "Security Audit & Hardening",
+    description: "Comprehensive cybersecurity audit, penetration testing, and remediation plan.",
+    startDate: "2025-07-01",
+    endDate: "2025-10-31",
+    status: "Pending",
+    clientId: "CUST-1014",      // Harshit Singh — Data Systems
+    originatorId: "USR-03",
+    originator: "Priya Sharma",
+    dealValue: 22000,
+    tasks: [
+      { id: "T-030", name: "Initial Assessment",     status: "pending", startDate: "2025-07-01", endDate: "2025-07-15", implementers: ["Priya Sharma"] },
+      { id: "T-031", name: "Penetration Testing",    status: "pending", startDate: "2025-07-16", endDate: "2025-08-31", implementers: ["John Doe", "Lucas Martínez"] },
+      { id: "T-032", name: "Vulnerability Report",   status: "pending", startDate: "2025-09-01", endDate: "2025-09-20", implementers: ["Priya Sharma"] },
+      { id: "T-033", name: "Remediation",            status: "pending", startDate: "2025-09-21", endDate: "2025-10-20", implementers: ["Lucas Martínez"] },
+      { id: "T-034", name: "Final Audit Report",     status: "pending", startDate: "2025-10-21", endDate: "2025-10-31", implementers: ["Priya Sharma", "John Doe"] },
+    ],
+  },
+];

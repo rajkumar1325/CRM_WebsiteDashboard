@@ -10,6 +10,9 @@ import Support from "./assets/components/Support/Support.jsx";
 import Deals from "./assets/components/Deals/Deals.jsx";
 import Reports from "./assets/components/Reports/Reports.jsx";
 import Tasks from "./assets/components/Tasks/Tasks.jsx";
+import Projects from "./assets/components/Projects/Projects.jsx";
+import CalendarPage from "./assets/components/Calender/CalendarPage.jsx";
+import Team from "./assets/components/Team/Team.jsx";
 
 function App() {
   const [search, setSearch] = useState("");
@@ -21,6 +24,9 @@ function App() {
     if (location.pathname === "/customers") return "Search by customer name and Company";
     if (location.pathname === "/support") return "Search by support tickets";
     if (location.pathname === "/deals") return "Search deals";
+    if (location.pathname === "/projects") return "Search projects...";
+    if (location.pathname === "/calender") return "Search events...";
+    if (location.pathname === "/team") return "Search team members...";
     return "Search now...";
   };
 
@@ -47,6 +53,12 @@ function App() {
             <Route path="/deals" element={<Deals darkMode={dark} searchQuery={search} />} />
             <Route path="/reports" element={<Reports darkMode={dark} />} />
             <Route path="/taskAndActivities" element={<Tasks darkMode={dark} />} />
+            <Route path="/projects" element={<Projects darkMode={dark} searchQuery={search} />} />
+            <Route path="/calendar" element={<CalendarPage darkMode={dark} />} />
+            <Route path="/team" element={<Team darkMode={dark} searchQuery={search} />} />  
+            {/* <Route path="/team" element={<Team darkMode={dark} searchQuery={search} />} /> */}
+
+            
           </Routes>
         </div>
       </main>

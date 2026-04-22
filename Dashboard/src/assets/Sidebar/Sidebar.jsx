@@ -6,6 +6,9 @@ import {
 } from "lucide-react";
 
 import ProfileImg from "./profile.jpg";
+import { FolderKanban } from "lucide-react";
+import { CalendarDays} from "lucide-react";
+import { UserRound } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -13,16 +16,20 @@ import ProfileImg from "./profile.jpg";
 const getInitials = (n) => n.split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Navigation items config
+// Navigation items config --> also decides the order of items in the sidebar
 // ─────────────────────────────────────────────────────────────────────────────
 const NAV_ITEMS = [
   { to: "/",                  label: "Home",      Icon: Home          },
   { to: "/leads",             label: "Leads",     Icon: UsersRound    },
   { to: "/customers",         label: "Customers", Icon: Users         },
-  { to: "/support",           label: "Support",   Icon: Headphones    },
   { to: "/deals",             label: "Deals",     Icon: Handshake     },
-  { to: "/reports",           label: "Reports",   Icon: BarChart3     },
+  { to: "/projects",          label: "Projects",  Icon: FolderKanban   },
   { to: "/taskAndActivities", label: "Tasks",     Icon: ClipboardList },
+  { to: "/calendar",          label:"Calendar",   Icon: CalendarDays},
+  { to: "/support",           label: "Support",   Icon: Headphones    },
+  { to: "/team",              label:"Team",       Icon: UserRound},
+  { to: "/reports",           label: "Reports",   Icon: BarChart3     },
+
 ];
 
 const USER_NAME   = "Raj Kumar";

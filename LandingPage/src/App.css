@@ -1,0 +1,140 @@
+
+/* ==== Existing floating particles ==== */
+@keyframes float-slow {
+  0% {
+    transform: translateY(0px);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-18px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0px);
+    opacity: 0.6;
+  }
+}
+@keyframes float-slower {
+  0% {
+    transform: translateY(0px);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(22px);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(0px);
+    opacity: 0.4;
+  }
+}
+
+
+/* 🌟 Glow Light Beam */
+.glow-stream {
+  position: absolute;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 900px;
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(140, 255, 100, 0.65),
+    rgba(0, 0, 0, 0)
+  );
+  filter: blur(80px);
+  animation: streamMove 6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes streamMove {
+  0% {
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    transform: translateX(-50%) translateY(25px);
+  }
+}
+
+/* === Smooth Fade & Upward Slide === */
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.fade-section {
+  opacity: 0;
+  animation: fadeUp 0.8s ease-out forwards;
+}
+
+.fade-delay-1 {
+  animation-delay: 0.15s;
+}
+.fade-delay-2 {
+  animation-delay: 0.3s;
+}
+.fade-delay-3 {
+  animation-delay: 0.45s;
+}
+
+/* Hover micro-interaction */
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 255, 255, 0.08);
+}
+
+
+
+/* password confirmation check */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-4px); }
+  100% { transform: translateX(0); }
+}
+
+.input-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+
+
+/* Testimonials animation */
+@keyframes fadeSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+
+  /* Fade in while sliding left */
+  20% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* Stay still & visible for 1 second */
+  60% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* Move left & fade out */
+  100% {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+}
+
+.animate-fade {
+  animation: fadeSlide 2s ease-in-out infinite;
+}

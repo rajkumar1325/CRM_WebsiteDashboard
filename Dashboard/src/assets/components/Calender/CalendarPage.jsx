@@ -87,7 +87,7 @@ export default function CalendarPage({ darkMode }) {
   const calRef = useRef(null);
 
   // ── Theme tokens ──────────────────────────────────────────────────────────
-  const bg          = darkMode ? "#171821"                : "#f1f5f9";
+  const bg          = darkMode ? "#171821"                : "#fffbeb";
   const cardBg      = darkMode ? "rgba(33,34,45,0.88)"   : "rgba(255,255,255,0.88)";
   const borderCol   = darkMode ? "rgba(255,255,255,0.07)": "rgba(0,0,0,0.08)";
   const headerBg    = darkMode ? "rgba(15,17,28,0.95)"   : "rgba(241,245,249,0.95)";

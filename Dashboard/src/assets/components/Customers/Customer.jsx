@@ -23,7 +23,7 @@ function StatCard({ icon: Icon, label, value, accent, darkMode }) {
       }}
     >
       <div
-        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
         style={{ background: `${accent}18`, border: `1px solid ${accent}30` }}
       >
         <Icon size={15} style={{ color: accent }} />
@@ -113,7 +113,7 @@ const Customer = ({ darkMode, searchQuery = "" }) => {
   }), []);
 
   // ── Theme tokens ──────────────────────────────────────────────────────────
-  const bg          = darkMode ? "#171821"                  : "#f1f5f9";
+  const bg          = darkMode ? "#171821"                  : "#fffbeb";
   const cardBg      = darkMode ? "rgba(33,34,45,0.80)"      : "rgba(255,255,255,0.85)";
   const borderCol   = darkMode ? "rgba(255,255,255,0.07)"   : "rgba(0,0,0,0.08)";
   const textPrimary = darkMode ? "#e2e8f0"                  : "#0f172a";

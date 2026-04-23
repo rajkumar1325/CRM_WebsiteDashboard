@@ -155,7 +155,7 @@ export default function CRMReportsDashboard({ darkMode, isDark }) {
 
   return (
     <div 
-      className={`min-h-screen font-sans overflow-x-hidden ${activeTheme ? "bg-[#0B0F19] text-white" : "bg-slate-50 text-slate-800"}`}
+      className={`min-h-screen font-sans overflow-x-hidden ${activeTheme ? "bg-[#0B0F19] text-white" : "bg-amber-50 text-slate-800"}`}
       style={{ fontFamily: "'DM Sans', 'SF Pro Display', system-ui, sans-serif" }}
     >
       <div className="relative z-10 flex">

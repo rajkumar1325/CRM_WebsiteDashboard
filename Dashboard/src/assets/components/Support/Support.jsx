@@ -153,7 +153,7 @@ const Support = ({ darkMode, searchQuery = "" }) => {
   };
 
   // ── Theme tokens ──────────────────────────────────────────────────────────
-  const bg          = darkMode ? "#171821"                : "#f1f5f9";
+  const bg          = darkMode ? "#171821"                : "#fffbeb";
   const cardBg      = darkMode ? "rgba(33,34,45,0.82)"   : "rgba(255,255,255,0.85)";
   const borderCol   = darkMode ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)";
   const textPrimary = darkMode ? "#e2e8f0"                : "#0f172a";

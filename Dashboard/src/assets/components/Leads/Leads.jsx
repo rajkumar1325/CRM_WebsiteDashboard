@@ -44,7 +44,7 @@ function StatCard({ icon: Icon, label, value, accent, darkMode }) {
     <div
       className="flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all duration-200 hover:scale-[1.02]"
       style={{
-        background: darkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)",
+        background: darkMode ? "bg-[#171821]" : "bg-amber-50",
         borderColor: darkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
         backdropFilter: "blur(12px)",
       }}
@@ -204,7 +204,7 @@ export default function Leads({ darkMode, searchQuery = "" }) {
   }), [leads]);
 
   // ── Theme tokens ──────────────────────────────────────────────────────────
-  const bg         = darkMode ? "#171821"             : "#f1f5f9";
+  const bg         = darkMode ? "#171821"             : "#fffbeb"; // page-background : bg-amber-50 (off-white)
   const cardBg     = darkMode ? "rgba(33,34,45,0.85)" : "rgba(255,255,255,0.85)";
   const borderCol  = darkMode ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)";
   const headerBg   = darkMode ? "rgba(15,17,28,0.9)"  : "rgba(241,245,249,0.9)";

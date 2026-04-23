@@ -144,7 +144,7 @@ function AddTaskModal({ activeTheme, onAdd, onClose }) {
 
   const inputCls = activeTheme
     ? "bg-black/20 border-white/10 text-white placeholder-white/20 focus:border-blue-500/50 focus:bg-black/40"
-    : "bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:border-blue-400 focus:bg-white";
+    : "bg-amber-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:border-blue-400 focus:bg-white";
   const labelCls = activeTheme ? "text-slate-400" : "text-slate-500";
 
   const Field = ({ label, children }) => (
@@ -272,7 +272,7 @@ export default function TasksPage({ darkMode, isDark, searchQuery = "" }) {
       ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
       : activeTheme
         ? "bg-transparent text-slate-400 border-white/10 hover:bg-white/5 hover:text-white"
-        : "bg-transparent text-slate-500 border-slate-200 hover:bg-slate-50 hover:text-slate-800"
+        : "bg-transparent text-slate-500 border-slate-200 hover:bg-amber-50 hover:text-slate-800"
     }
   `;
 
@@ -289,7 +289,7 @@ export default function TasksPage({ darkMode, isDark, searchQuery = "" }) {
 
   return (
     <div 
-      className={`min-h-screen font-sans p-8 overflow-x-hidden ${activeTheme ? "bg-[#0B0F19] text-white" : "bg-slate-50 text-slate-800"}`} 
+      className={`min-h-screen font-sans p-8 overflow-x-hidden ${activeTheme ? "bg-[#0B0F19] text-white" : "bg-amber-50 text-slate-800"}`} 
       style={{ fontFamily: "'DM Sans', 'SF Pro Display', system-ui, sans-serif" }}
     >
       <div className="relative z-10 max-w-7xl mx-auto">

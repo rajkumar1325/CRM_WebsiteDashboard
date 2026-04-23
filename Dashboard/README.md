@@ -1,3 +1,5 @@
+background : white-amber-50 (light warm)
+
 class --> tailwind
 className = own react
 <!-- Actually both are same -->

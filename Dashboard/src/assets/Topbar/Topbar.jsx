@@ -13,6 +13,9 @@ import ChatIcon  from "./Icons/chatIcon.svg?react";
 // ── Topbar only controls open/close state — the panel renders itself fixed bottom-right.
 import CRMChatbot from "../components/Chatbot/CRMChatbot";
 
+
+import Settings   from "../components/Settings/Settings";
+
 function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
 
   const [isChatOpen,    setIsChatOpen]    = useState(false);
@@ -125,6 +128,7 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
             <path d="M14.5 14.5l3 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
           </svg>
 
+          {/* /// Search input is fully controlled by parent (Topbar doesn't manage its own state). */}
           <input
             ref={searchRef}
             type="text"
@@ -135,7 +139,9 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
             className={`w-full pl-9 pr-14 py-2 rounded-xl border text-sm outline-none transition-all duration-200 ${inputBg} ${inputShadow}`}
           />
 
-          <kbd className={`
+
+          {/* /// Shortcut hint, only visible when search is not focused */}
+          <kbd className={` 
             absolute right-3 top-1/2 -translate-y-1/2
             hidden sm:flex items-center gap-0.5
             px-1.5 py-0.5 rounded text-[10px] font-mono border
@@ -146,6 +152,9 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
             {shortcutLabel}
           </kbd>
         </div>
+
+
+
 
         {/* ── Right icon cluster ── */}
         <div className="flex items-center gap-1.5 shrink-0 ml-auto">
@@ -187,6 +196,7 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
             )}
           </div>
 
+
           {/*
             AI Chatbot trigger.
             Click toggles the fixed glass panel rendered BELOW this Topbar (outside z-stack).
@@ -224,7 +234,7 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
           </IconBtn>
 
           {/* Settings */}
-          <IconBtn onClick={() => alert("Settings")} title="Settings">
+          <IconBtn onClick={() => <Settings />} title="Settings">
             <Setting className={`w-5 h-5 transition-colors duration-200 ${iconColor}`} />
           </IconBtn>
 

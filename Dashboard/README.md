@@ -3,6 +3,10 @@ to make it transparent :
     1. in hex : Completely transparent (0%) ke liye: bg-[#171821]/0  -->6-digit hex code likho -> uske aage forward slash (/) lagakar opacity percentage likh do.
     2. bg-transparent likho. Ye CSS ke background-color: transparent; jaisa kaam karta hai.
 
+    TOBAR ME CLICK KRKE SWICH TO NEW PAGE/ROUTE SWITCH : eg : setting btn
+Agar tum apne project mein react-router-dom use kar rahe ho aur tumne App.jsx mein /settings ka route banaya hua hai, toh tumhe page change karne ke liye useNavigate hook ka use karna hoga.
+
+
 class --> tailwind
 className = own react
 <!-- Actually both are same -->

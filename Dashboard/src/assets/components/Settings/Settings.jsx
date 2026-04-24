@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import {useEffect, useState, useRef } from "react";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    CURIEM CRM — Settings.jsx   (Complete · 9 Tabs · Apple Glass Morphism)
@@ -1272,12 +1272,18 @@ function AppearanceTab({ darkMode, setDarkMode }) {
   );
 }
 
+
+
 /* ═══════════════════════════════════════════════════════════════════════════
    MAIN SETTINGS PAGE
 ═══════════════════════════════════════════════════════════════════════════ */
 export default function Settings({ darkMode: darkProp, isDark, setIsDark, userRole = "Admin", currentUser }) {
   const [dark, setDarkLocal] = useState(darkProp ?? isDark ?? true);
   const [tab, setTab]        = useState("profile");
+
+  // sync dark mode with parent(TOPBAR) component (in case it's changed elsewhere in the app)
+  useEffect(() => { if (isDark !== undefined) setDarkLocal(isDark); }, [isDark]);
+
 
   const setDark = v => { setDarkLocal(v); if (setIsDark) setIsDark(v); };
 

@@ -289,10 +289,12 @@ export default function TasksPage({ darkMode, isDark, searchQuery = "" }) {
 
   return (
     <div 
-      className={`min-h-screen font-sans p-8 overflow-x-hidden ${activeTheme ? "bg-[#0B0F19] text-white" : "bg-amber-50 text-slate-800"}`} 
+      className={`w-full font-sans p-8 overflow-x-hidden ${activeTheme ? "bg-[#171821] text-white" : "bg-amber-50 text-slate-800"}`} 
       style={{ fontFamily: "'DM Sans', 'SF Pro Display', system-ui, sans-serif" }}
     >
-      <div className="relative z-10 max-w-7xl mx-auto">
+      
+      {/* // MAIN CONTAINER with relative positioning for potential future glow effects */}
+      <div className="relative z-10 w-full"> 
         
         {/* ── Page header ── */}
         <div className="flex items-center justify-between mb-8">

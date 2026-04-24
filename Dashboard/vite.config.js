@@ -10,6 +10,11 @@ export default defineConfig({
   plugins: [
     react(), tailwindcss(), svgr()
   ],
-  
+
+  // helps in local sharing
+  server: {
+    host: true,
+    allowedHosts: ['slick-guests-think.loca.lt'] 
+  }
 
 })

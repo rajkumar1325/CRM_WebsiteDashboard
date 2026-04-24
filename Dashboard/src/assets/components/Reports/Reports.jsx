@@ -155,11 +155,11 @@ export default function CRMReportsDashboard({ darkMode, isDark }) {
 
   return (
     <div 
-      className={`min-h-screen font-sans overflow-x-hidden ${activeTheme ? "bg-[#0B0F19] text-white" : "bg-amber-50 text-slate-800"}`}
+      className={`min-h-screen font-sans overflow-x-hidden ${activeTheme ? "bg-[#171821]/0 text-white/0" : "bg-amber-50 text-slate-800"}`}
       style={{ fontFamily: "'DM Sans', 'SF Pro Display', system-ui, sans-serif" }}
     >
       <div className="relative z-10 flex">
-        <main className="flex-1 px-8 py-8 w-full max-w-7xl mx-auto">
+        <main className="flex-1 px-8 py-8 w-full">
 
           {/* ── KPI METRIC TILES ── */}
           <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">

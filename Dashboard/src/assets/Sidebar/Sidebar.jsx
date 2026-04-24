@@ -9,6 +9,7 @@ import ProfileImg from "./profile.jpg";
 import { FolderKanban } from "lucide-react";
 import { CalendarDays} from "lucide-react";
 import { UserRound } from "lucide-react";
+import { SettingsIcon } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { to: "/support",           label: "Support",   Icon: Headphones    },
   { to: "/team",              label:"Team",       Icon: UserRound},
   { to: "/reports",           label: "Reports",   Icon: BarChart3     },
+  { to: "/settings",           label: "Settings",   Icon: SettingsIcon     }
 
 ];
 

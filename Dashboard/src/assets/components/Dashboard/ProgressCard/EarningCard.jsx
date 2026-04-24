@@ -10,7 +10,7 @@ import {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 // Earning target — in production this would come from props or an API
-const MONTHLY_TARGET = 2000000;
+const MONTHLY_TARGET = 2000000; // 2 million target for the month
 
 // ─── Animated count-up hook ───────────────────────────────────────────────────
 function useCountUp(target, duration = 1400) {
@@ -57,7 +57,7 @@ function GaugeNeedle({ darkMode }) {
     y: cy - baseWidth * Math.cos(baseAngleR),
   };
 
-  return (
+  return ( // Needle is a filled triangle + concentric circles for the hub, with a gradient fill for extra flair
     <g>
       {/* Tapered needle body */}
       <path
@@ -66,9 +66,9 @@ function GaugeNeedle({ darkMode }) {
         opacity={0.95}
       />
       {/* Center hub circle */}
-      <circle cx={cx} cy={cy} r={9}  fill={darkMode ? "#1a1a2e" : "#ffffff"} />
-      <circle cx={cx} cy={cy} r={6}  fill="#c084fc" />
-      <circle cx={cx} cy={cy} r={3}  fill={darkMode ? "rgba(255,255,255,0.9)" : "#fff"} />
+      <circle cx={cx} cy={cy} r={37}  fill={darkMode ? "#1a1a2e" : "#FFF1E2"} />
+      <circle cx={cx} cy={cy} r={30}  fill="#B2F5EA" />
+      <circle cx={cx} cy={cy} r={25}  fill={darkMode ? "rgba(255,255,255,0.9)" : "#fff"} />
 
       {/* Gradient def for needle */}
       <defs>
@@ -93,7 +93,7 @@ function GaugeCenterLabel({ value, darkMode }) {
       x={cx}
       y={cy + 10} // slightly below center for half-gauge visual balance
       textAnchor="middle"
-      fontSize={22}
+      fontSize={18}
       fontWeight={700}
       letterSpacing={-0.5}
       fill={darkMode ? "#ffffff" : "#1a1a2e"}
@@ -103,13 +103,16 @@ function GaugeCenterLabel({ value, darkMode }) {
   );
 }
 
+
+
+
 // ─── Mini Stat Chip ───────────────────────────────────────────────────────────
 /** Small stat pill shown below the gauge: e.g. "Target", "MoM", "YTD" */
 function StatChip({ label, value, color, darkMode }) {
-  return (
-    <div className={`stat-chip ${darkMode ? "chip-bg-dark" : "chip-bg-light"}`}>
-      <span className={`chip-label ${darkMode ? "chip-label-dark" : "chip-label-light"}`}>{label}</span>
-      <span className="chip-value" style={{ color }}>{value}</span>
+  return ( 
+    <div className={`stat-chip ${darkMode ? "chip-bg-dark" : "chip-bg-light"}`}> 
+      <span className={`chip-label ${darkMode ? "chip-label-dark" : "chip-label-light"}`}>{label}</span> 
+      <span className="chip-value" style={{ color }}>{value}</span> {/* // Value colored for emphasis, e.g. green for good earnings, red for bad */} 
     </div>
   );
 }

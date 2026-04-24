@@ -296,7 +296,7 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
 
         <CRMChatbot
           darkMode={isDark}
-          onClose={close}
+          onClose={() => setIsChatOpen(false)}
           crmData={{ mockData, analyticsData, calendarData, dealsData, tasksData, customersData, AGENTS }}
         />
       )}

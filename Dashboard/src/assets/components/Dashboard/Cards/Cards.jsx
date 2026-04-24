@@ -15,7 +15,7 @@ import DownIcon from "./icons/down-arrow.svg?react";
 /** Returns true if the given date string matches today's date */
 function isToday(dateStr) {
   const d = new Date(dateStr);
-  const now = new Date();
+  const now = new Date(); // current date/time for comparison
   return (
     d.getFullYear() === now.getFullYear() &&
     d.getMonth() === now.getMonth() &&
@@ -43,10 +43,10 @@ function isYesterday(dateStr) {
  */
 function getChange(today, yesterday) {
   if (yesterday === 0 && today === 0)
-    return { percent: "0%", diff: 0, direction: "neutral", color: "change-neutral" };
+    return { percent: "0%", diff: 0, direction: "neutral", color: "change-neutral" }; 
 
   if (yesterday === 0)
-    return { percent: "+100%", diff: today, direction: "up", color: "change-up" };
+    return { percent: "+100%", diff: today, direction: "up", color: "change-up" }; // From 0 to something is a 100% increase
 
   const diff = today - yesterday;
   const percent = ((diff / yesterday) * 100).toFixed(1);
@@ -66,7 +66,7 @@ function getChange(today, yesterday) {
 // ─── Animated Counter Hook ────────────────────────────────────────────────────
 /**
  * Custom hook: animates a number from 0 → target on mount.
- * Gives each card that satisfying "counting up" entrance feel.
+ * Gives satisfying "counting up" entrance feel.
  */
 function useCountUp(target, duration = 1200) {
   const [count, setCount] = useState(0);
@@ -102,11 +102,12 @@ function useCountUp(target, duration = 1200) {
  *  • Staggered entrance via CSS animation-delay
  */
 function GlassCard({ icon, label, value, suffix = "", change, darkMode, delay = 0 }) {
-  const cardRef = useRef(null);
-  const glowRef = useRef(null);
-  const [setHovered] = useState(false);
+  const cardRef = useRef(null); // for 3D tilt and glow tracking
+  const glowRef = useRef(null); // for controlling the cursor shimmer glow
 
-  const animatedValue = useCountUp(parseFloat(value));
+  const [hovered, setHovered] = useState(false); // as it must return a array.
+
+  const animatedValue = useCountUp(parseFloat(value)); // animate the main metric value on mount
 
 
 
@@ -190,12 +191,12 @@ function GlassCard({ icon, label, value, suffix = "", change, darkMode, delay = 
 
       {/* ── Main metric value ── */}
       <div className="card-value">
-        {animatedValue}{suffix}
+        {animatedValue}{suffix} {/* Append suffix to the VALUE if provided (e.g. % for conversion rate) */}
       </div>
 
-      {/* ── Label ── */}
+      {/* ── Label {Total leads or Active leads etc...}── */}
       <div className={`card-label ${darkMode ? "label-dark" : "label-light"}`}>
-        {label}
+        {label} 
       </div>
 
       {/* ── Bottom change row ── */}

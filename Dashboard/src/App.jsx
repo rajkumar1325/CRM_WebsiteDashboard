@@ -13,12 +13,14 @@ import Tasks from "./assets/components/Tasks/Tasks.jsx";
 import Projects from "./assets/components/Projects/Projects.jsx";
 import CalendarPage from "./assets/components/Calender/CalendarPage.jsx";
 import Team from "./assets/components/Team/Team.jsx";
+import Settings from "./assets/components/Settings/Settings.jsx";
 
 function App() {
   const [search, setSearch] = useState("");
   const [dark, setDark] = useState(true);
   const location = useLocation();
 
+  // Dynamic placeholder based on current route for better UX context in the search bar
   const getPlaceHolder = () => {
     if (location.pathname === "/leads") return "Search by name and Company";
     if (location.pathname === "/customers") return "Search by customer name and Company";
@@ -57,6 +59,20 @@ function App() {
             <Route path="/calendar" element={<CalendarPage darkMode={dark} />} />
             <Route path="/team" element={<Team darkMode={dark} searchQuery={search} />} />  
             {/* <Route path="/team" element={<Team darkMode={dark} searchQuery={search} />} /> */}
+
+            <Route path="/settings" element={
+              <Settings
+                isDark={dark}
+                setIsDark={setDark}
+                userRole="Admin"
+                currentUser={{
+                  name: "Raj Kumar",
+                  email: "raj.kumar@curiumcrm.com",
+                  phone: "+91 98765 43210",
+                  initials: "RK",
+                }}
+              />
+            } />
 
             
           </Routes>

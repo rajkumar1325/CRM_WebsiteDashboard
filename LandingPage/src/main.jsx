@@ -4,7 +4,7 @@ import './index.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
-  // <StrictMode> // ← temporarily disable StrictMode to avoid double useEffect calls
+  <StrictMode>
     <App />
-  // </StrictMode>,
+  </StrictMode>,
 )

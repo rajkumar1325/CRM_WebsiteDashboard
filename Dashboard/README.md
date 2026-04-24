@@ -1,4 +1,7 @@
 background : white-amber-50 (light warm)
+to make it transparent : 
+    1. in hex : Completely transparent (0%) ke liye: bg-[#171821]/0  -->6-digit hex code likho -> uske aage forward slash (/) lagakar opacity percentage likh do.
+    2. bg-transparent likho. Ye CSS ke background-color: transparent; jaisa kaam karta hai.
 
 class --> tailwind
 className = own react

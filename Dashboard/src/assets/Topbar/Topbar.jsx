@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 
 import { mockData, analyticsData, calendarData, dealsData, tasksData, customersData, AGENTS } from "../MockData/MockData";
-
+import { useNavigate } from "react-router-dom";
 
 import BellIcon  from "./Icons/bell-notification.svg?react";
 import Setting   from "./Icons/settings.svg?react";
@@ -17,6 +17,7 @@ import CRMChatbot from "../components/Chatbot/CRMChatbot";
 import Settings   from "../components/Settings/Settings";
 
 function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
+  const navigate = useNavigate(); // initialse the hook
 
   const [isChatOpen,    setIsChatOpen]    = useState(false);
   const [isNotifOpen,   setIsNotifOpen]   = useState(false);
@@ -233,12 +234,14 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
             }
           </IconBtn>
 
+
           {/* Settings */}
-          <IconBtn onClick={() => <Settings />} title="Settings">
+          <IconBtn onClick={() => navigate("/settings")} title="Settings">
             <Setting className={`w-5 h-5 transition-colors duration-200 ${iconColor}`} />
           </IconBtn>
 
           <div className={`hidden sm:block w-px h-6 mx-1 shrink-0 ${divider}`} />
+
 
           {/* Profile dropdown */}
           <div ref={profileRef} className="relative">

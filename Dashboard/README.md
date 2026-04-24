@@ -6,6 +6,23 @@ to make it transparent :
     TOBAR ME CLICK KRKE SWICH TO NEW PAGE/ROUTE SWITCH : eg : setting btn
 Agar tum apne project mein react-router-dom use kar rahe ho aur tumne App.jsx mein /settings ka route banaya hua hai, toh tumhe page change karne ke liye useNavigate hook ka use karna hoga.
 
+```
+// 1. Upar import add karo
+import { useNavigate } from "react-router-dom";
+
+function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
+  // 2. Hook initialize karo
+  const navigate = useNavigate();
+
+  // ... baaki ka code ...
+
+  // 3. Button ka onClick update karo
+  <IconBtn onClick={() => navigate("/settings")} title="Settings">
+    <Setting className={`w-5 h-5 transition-colors duration-200 ${iconColor}`} />
+  </IconBtn>
+
+```
+
 
 class --> tailwind
 className = own react

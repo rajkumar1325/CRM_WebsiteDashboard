@@ -22,6 +22,49 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
   </IconBtn>
 
 ```
+---
+---
+
+## CloudFlare intgration issue
+"Failed to fetch" is a CORS error — Cloudflare's AI API doesn't allow direct browser calls for security reasons.
+You need a small proxy. The easiest fix is a Vite proxy so requests go through your dev server instead.
+
+```
+// Step 1 — Update vite.config.js:
+javascriptimport { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      '/cf-ai': {
+        target: 'https://api.cloudflare.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/cf-ai/, '/client/v4'),
+      }
+    }
+  }
+})
+```
+
+```
+// Step 2 — Update the URL in your chatbot file: 
+
+// OLD
+const CloudF_Api_Url = `https://api.cloudflare.com/client/v4/accounts/${CloudF_Account_id}/ai/run/@cf/meta/llama-3.1-8b-instruct`;
+
+// NEW
+const CloudF_Api_Url = `/cf-ai/accounts/${CloudF_Account_id}/ai/run/@cf/meta/llama-3.1-8b-instruct`;
+
+```
+
+---
+---
+
+
+// NEW
+const CloudF_Api_Url = `/cf-ai/accounts/${CloudF_Account_id}/ai/run/@cf/meta/llama-3.1-
 
 
 class --> tailwind

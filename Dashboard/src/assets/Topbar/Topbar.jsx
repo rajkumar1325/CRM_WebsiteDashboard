@@ -9,9 +9,10 @@ import Sun       from "./Icons/sun-light.svg?react";
 import Moon      from "./Icons/half-moon.svg?react";
 import ChatIcon  from "./Icons/chatIcon.svg?react";
 
-// ── CRMChatbot is now a self-contained glass panel.
+// ── CRMChatbot.
 // ── Topbar only controls open/close state — the panel renders itself fixed bottom-right.
 import CRMChatbot from "../components/Chatbot/CRMChatbot";
+import CRMChatbotCloudflare from "../components/Chatbot/CRMChatbotCloudflare";
 
 
 import Settings   from "../components/Settings/Settings";
@@ -307,7 +308,13 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
       */}
       {isChatOpen && (
 
-        <CRMChatbot
+        // <CRMChatbot
+        //   darkMode={isDark}
+        //   onClose={() => setIsChatOpen(false)}
+        //   crmData={{ mockData, analyticsData, calendarData, dealsData, tasksData, customersData, AGENTS }}
+        // />
+
+        <CRMChatbotCloudflare
           darkMode={isDark}
           onClose={() => setIsChatOpen(false)}
           crmData={{ mockData, analyticsData, calendarData, dealsData, tasksData, customersData, AGENTS }}

@@ -22,6 +22,12 @@
 //     CTASection.jsx
 //     FooterSection.jsx
 
+
+
+
+
+
+// ─── LandingPage.jsx (main orchestrator) ─────────────────────────────────────
 import { useEffect, useState, useRef } from "react";
 
 import { LANDING_CSS }        from "./landingStyles";
@@ -37,33 +43,78 @@ import FooterSection          from "./sections/FooterSection";
 
 export default function LandingPage() {
 
-  // ── Auth card state (shared between Navbar CTAs → HeroSection) ────────────
-  const [authMode, setAuthMode]           = useState("signup");   // "signup" | "login"
+  // ── Auth card state ────────────────────────────────────────────────────────
+  const [authMode, setAuthMode]           = useState("signup");
   const [authHighlight, setAuthHighlight] = useState(false);
   const authCardRef                       = useRef(null);
-
-  // Auth form state (lifted so Navbar can trigger focus + mode)
   const [selectedRole, setSelectedRole]   = useState(null);
-  const [password, setPassword]           = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [shake, setShake]                 = useState(false);
-  const [showPw, setShowPw]               = useState(false);
 
-  const passwordMatch = password === confirmPassword && password.length > 0;
+  // ── Unified form state ─────────────────────────────────────────────────────
+  const [formData, setFormData] = useState({
+    name: "",
+    company: "",
+    email: "",
+    phone: "",
+    city: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [shake, setShake]   = useState(false);
+  const [showPw, setShowPw] = useState(false);
+
+  const passwordMatch =
+    formData.password.length >= 8 &&
+    formData.password === formData.confirmPassword;
 
   const triggerShake = () => {
     setShake(true);
     setTimeout(() => setShake(false), 400);
   };
 
-  // Scroll auth card into view + flash highlight ring
   const focusAuthCard = () => {
     authCardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     setAuthHighlight(true);
     setTimeout(() => setAuthHighlight(false), 800);
   };
 
-  // ── Parallax scroll ───────────────────────────────────────────────────────
+  // ── Submit handler ─────────────────────────────────────────────────────────
+  const handleAuthSubmit = async ({ role, endpoint, ...data }) => {
+    const isApiRoute = endpoint.startsWith("/api/");
+
+    const body = isApiRoute
+      ? JSON.stringify({ ...data, role })
+      : new URLSearchParams({ ...data, role }).toString();
+
+    const headers = {
+      "Content-Type": isApiRoute
+        ? "application/json"
+        : "application/x-www-form-urlencoded",
+    };
+
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers,
+        body,
+        credentials: "include", // needed for session cookies
+      });
+
+      if (res.redirected) {
+        window.location.href = res.url; // follow Spring MVC redirect
+        return;
+      }
+
+      const json = await res.json();
+      console.log("Auth response:", json);
+      // TODO: store JWT token if using /api/auth/* routes
+      // localStorage.setItem("token", json.token);
+    } catch (err) {
+      console.error("Auth error:", err);
+    }
+  };
+
+  // ── Parallax scroll ────────────────────────────────────────────────────────
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -84,20 +135,17 @@ export default function LandingPage() {
   const layer1 = scrollY * 0.08;
   const layer2 = scrollY * 0.15;
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div
       className="min-h-screen text-gray-100 relative overflow-x-hidden"
       style={{ background: "#060918", fontFamily: "'DM Sans', -apple-system, sans-serif" }}
     >
-      {/* Global styles + animations */}
       <style>{LANDING_CSS}</style>
 
-      {/* ── Background: parallax glow orbs ── */}
       <div className="lp-glow-orb-1" style={{ transform: `translateY(${layer1}px)` }} />
       <div className="lp-glow-orb-2" style={{ transform: `translateY(${layer2}px)` }} />
 
-      {/* ── Background: subtle dot grid ── */}
       <div
         className="pointer-events-none fixed inset-0 z-0"
         style={{
@@ -107,7 +155,6 @@ export default function LandingPage() {
         }}
       />
 
-      {/* ── Background: floating particles ── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         <div className="absolute top-32 left-16 w-1.5 h-1.5 rounded-full bg-cyan-400/50 anim-float-a" />
         <div className="absolute top-1/2 right-24 w-1 h-1 rounded-full bg-purple-400/60 anim-float-b" style={{ animationDelay: "2s" }} />
@@ -115,7 +162,6 @@ export default function LandingPage() {
         <div className="absolute top-1/4 right-1/3 w-1 h-1 rounded-full bg-amber-400/50 anim-float-b" style={{ animationDelay: "1s" }} />
       </div>
 
-      {/* ── Page content ── */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <Navbar
@@ -130,34 +176,23 @@ export default function LandingPage() {
           setAuthMode={setAuthMode}
           selectedRole={selectedRole}
           setSelectedRole={setSelectedRole}
-          password={password}
-          setPassword={setPassword}
-          confirmPassword={confirmPassword}
-          setConfirmPassword={setConfirmPassword}
+          formData={formData}
+          setFormData={setFormData}
           shake={shake}
           showPw={showPw}
           setShowPw={setShowPw}
           passwordMatch={passwordMatch}
           triggerShake={triggerShake}
           focusAuthCard={focusAuthCard}
+          onSubmit={handleAuthSubmit}
         />
 
         <WorkflowSection />
-
         <FeaturesSection />
-
-        <PricingSection
-          focusAuthCard={focusAuthCard}
-        />
-
+        <PricingSection focusAuthCard={focusAuthCard} />
         <TestimonialsSection />
-
         <FAQSection />
-
-        <CTASection
-          onStartFree={() => { setAuthMode("signup"); focusAuthCard(); }}
-        />
-
+        <CTASection onStartFree={() => { setAuthMode("signup"); focusAuthCard(); }} />
         <FooterSection />
 
       </div>

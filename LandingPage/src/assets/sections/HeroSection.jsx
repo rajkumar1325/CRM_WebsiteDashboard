@@ -5,40 +5,119 @@
 //   authHighlight   — boolean, triggers zoom ring animation
 //   authMode        — "signup" | "login"
 //   setAuthMode
-//   selectedRole    — "admin" | "manager" | "employee" | null
+//   selectedRole    — "admin" | "employee" | "customer" | null
 //   setSelectedRole
-//   password, setPassword
-//   confirmPassword, setConfirmPassword
+//   formData        — { company, email, phone, city, password, confirmPassword }
+//   setFormData
 //   shake           — boolean
 //   showPw          — boolean
 //   setShowPw
 //   passwordMatch   — boolean
 //   triggerShake
 //   focusAuthCard
+//   onSubmit        — async function called with { role, ...formData }
 
 import { Icon } from "../shared/Icons";
 
+
 const ROLES = [
-  { key: "admin",    label: "Admin",    color: "#f87171", tip: "Full org access, users & billing" },
-  { key: "manager",  label: "Manager",  color: "#fbbf24", tip: "Team & project oversight"          },
-  { key: "employee", label: "Employee", color: "#34d399", tip: "Personal tasks & calendar"         },
+  {
+    key: "admin",
+    label: "Admin",
+    color: "#f87171",
+    tip: "Full org access, users & billing",
+    loginEndpoint: "/api/auth/login",
+    signupEndpoint: "/api/auth/register",
+  },
+  {
+    key: "employee",
+    label: "Employee",
+    color: "#fbbf24",
+    tip: "Team tasks, inquiries & sales",
+    loginEndpoint: "/api/auth/login",
+    signupEndpoint: "/api/auth/signup",
+  },
+  {
+    key: "customer",
+    label: "Customer",
+    color: "#34d399",
+    tip: "Browse courses, inquiries & feedback",
+    loginEndpoint: "/api/auth/login",
+    signupEndpoint: "/api/auth/signup",
+  },
 ];
+
+
 
 export default function HeroSection({
   authCardRef,
   authHighlight,
   authMode, setAuthMode,
   selectedRole, setSelectedRole,
-  password, setPassword,
-  confirmPassword, setConfirmPassword,
+  formData, setFormData,
   shake,
   showPw, setShowPw,
   passwordMatch,
   triggerShake,
   focusAuthCard,
+  onSubmit,
 }) {
+  const role = ROLES.find(r => r.key === selectedRole);
+
+  // ── Phone validation ───────────────────────────────────────────────────────
+  const phoneRaw    = formData?.phone ?? "";
+  // Strip leading +91 or 0 prefix for digit counting
+  const phoneDigits = phoneRaw.replace(/^\+91[\s-]?/, "").replace(/^0/, "").replace(/\D/g, "");
+
+  const phoneErrors = (() => {
+    if (!phoneRaw) return [];                                          // untouched — no errors yet
+    const errors = [];
+    if (/[a-zA-Z]/.test(phoneRaw))      errors.push("No letters allowed");
+    if (/[^0-9\s\+\-\(\)]/.test(phoneRaw)) errors.push("Special characters not allowed");
+    if (phoneDigits.length > 0 && phoneDigits.length < 10) errors.push(`${10 - phoneDigits.length} more digit(s) needed`);
+    if (phoneDigits.length > 10)        errors.push("Too many digits (max 10)");
+    return errors;
+  })();
+
+  const phoneValid  = phoneRaw.length > 0 && phoneErrors.length === 0 && phoneDigits.length === 10;
+  const phoneTouched = phoneRaw.length > 0;
+
+  // Controlled phone onChange — blocks alphabets on the fly
+  const handlePhoneChange = (e) => {
+    const val = e.target.value;
+    // Block any alphabet character from being typed at all
+    if (/[a-zA-Z]/.test(val)) return;
+    setFormData(prev => ({ ...prev, phone: val }));
+  };
+
+  // Convenience updater
+  const field = (key) => ({
+    value: formData?.[key] ?? "",
+    onChange: e => setFormData(prev => ({ ...prev, [key]: e.target.value })),
+  });
+
+  const handleSubmit = () => {
+    if (!selectedRole) {
+      alert("Please select a role first.");
+      return;
+    }
+    if (authMode === "signup" && !phoneValid) {
+      alert("Please enter a valid 10-digit phone number.");
+      return;
+    }
+    if (authMode === "signup" && !passwordMatch) {
+      triggerShake();
+      return;
+    }
+    const endpoint = authMode === "signup" ? role.signupEndpoint : role.loginEndpoint;
+    onSubmit?.({ ...formData, role: selectedRole, endpoint });
+  };
+
   return (
-    <section className="min-h-screen pt-16 pb-20 lg:pt-20 lg:pb-28 flex flex-col lg:flex-row items-start gap-12 lg:gap-16" style={{ minHeight: "calc(100vh - 73px)" }}>
+    <section
+      className="min-h-screen pt-16 pb-20 lg:pt-20 lg:pb-28 flex flex-col lg:flex-row items-start gap-12 lg:gap-16"
+      style={{ minHeight: "calc(100vh - 73px)" }}
+    >
 
       {/* ── LEFT: Copy ── */}
       <div className="flex-1 anim-slide-up">
@@ -86,7 +165,7 @@ export default function HeroSection({
           </div>
           <div>
             <span className="font-semibold text-white/70">3 role dashboards</span>
-            <br />Admin · Manager · Employee
+            <br />Admin · Employee · Customer
           </div>
           <div>
             <span className="font-semibold text-white/70">Auto deadline</span>
@@ -111,7 +190,7 @@ export default function HeroSection({
           <div className="p-5">
             {/* Role selector */}
             <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-3">
-              Choose your role
+              I am a…
             </p>
             <div className="grid grid-cols-3 gap-2 mb-5">
               {ROLES.map(({ key, label, color, tip }) => (
@@ -132,6 +211,15 @@ export default function HeroSection({
                 </div>
               ))}
             </div>
+
+            {/* Role hint — shows which endpoint will be called */}
+            {selectedRole && (
+              <p className="text-[10px] text-white/25 mb-3 -mt-2">
+                {authMode === "login"
+                  ? `→ ${role?.loginEndpoint}`
+                  : `→ ${role?.signupEndpoint}`}
+              </p>
+            )}
 
             {/* Signup / Login toggle */}
             <div className="flex mb-5 p-1 rounded-full bg-white/5 border border-white/5">
@@ -160,17 +248,31 @@ export default function HeroSection({
 
             {/* Form fields */}
             <div className="space-y-3">
-              {/* Company — signup only */}
-              {authMode === "signup" && (
+
+              {/* Company — signup only, admin/employee */}
+              {authMode === "signup" && selectedRole !== "customer" && (
                 <div>
-                  <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wide mb-1.5">
-                    Company
-                  </label>
+                  <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wide mb-1.5">Company</label>
                   <input
                     type="text"
                     placeholder="Acme Corp."
                     className="w-full rounded-xl border border-white/8 px-3 py-2.5 text-xs text-white outline-none placeholder-white/20 focus:border-cyan-400/50 transition-colors"
                     style={{ background: "rgba(255,255,255,0.04)" }}
+                    {...field("company")}
+                  />
+                </div>
+              )}
+
+              {/* Full name — signup only, customer */}
+              {authMode === "signup" && selectedRole === "customer" && (
+                <div>
+                  <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wide mb-1.5">Full Name</label>
+                  <input
+                    type="text"
+                    placeholder="Jane Doe"
+                    className="w-full rounded-xl border border-white/8 px-3 py-2.5 text-xs text-white outline-none placeholder-white/20 focus:border-cyan-400/50 transition-colors"
+                    style={{ background: "rgba(255,255,255,0.04)" }}
+                    {...field("name")}
                   />
                 </div>
               )}
@@ -178,29 +280,89 @@ export default function HeroSection({
               {/* Email */}
               <div>
                 <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wide mb-1.5">
-                  Work Email
+                  {selectedRole === "customer" ? "Email" : "Work Email"}
                 </label>
                 <input
                   type="email"
                   placeholder="you@company.com"
                   className="w-full rounded-xl border border-white/8 px-3 py-2.5 text-xs text-white outline-none placeholder-white/20 focus:border-cyan-400/50 transition-colors"
                   style={{ background: "rgba(255,255,255,0.04)" }}
+                  {...field("email")}
                 />
               </div>
 
+              {/* Phone + City — signup only */}
+              {authMode === "signup" && (
+                <div className="grid grid-cols-2 gap-2">
+                  {/* ── Phone with live validation ── */}
+                  <div>
+                    <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wide mb-1.5">
+                      Phone
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="tel"
+                        placeholder="+91 98765..."
+                        maxLength={14}
+                        value={formData?.phone ?? ""}
+                        onChange={handlePhoneChange}
+                        className="w-full rounded-xl border px-3 py-2.5 pr-7 text-xs text-white outline-none placeholder-white/20 transition-colors"
+                        style={{
+                          background: "rgba(255,255,255,0.04)",
+                          borderColor: !phoneTouched
+                            ? "rgba(255,255,255,0.08)"
+                            : phoneValid
+                              ? "rgba(52,211,153,0.5)"   // green
+                              : "rgba(248,113,113,0.6)",  // red
+                        }}
+                      />
+                      {/* Status icon inside input */}
+                      {phoneTouched && (
+                        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px]">
+                          {phoneValid ? "✓" : "✗"}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Digit counter */}
+                    {phoneTouched && (
+                      <div className="flex items-center justify-between mt-1">
+                        <span className={`text-[9px] font-medium ${phoneValid ? "text-emerald-400" : phoneErrors.length ? "text-red-400" : "text-white/30"}`}>
+                          {phoneValid
+                            ? "✓ Valid number"
+                            : phoneErrors[0] ?? ""}
+                        </span>
+                        <span className={`text-[9px] tabular-nums ${phoneDigits.length === 10 ? "text-emerald-400" : "text-white/25"}`}>
+                          {phoneDigits.length}/10
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* City */}
+                  <div>
+                    <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wide mb-1.5">City</label>
+                    <input
+                      type="text"
+                      placeholder="Mumbai"
+                      className="w-full rounded-xl border border-white/8 px-3 py-2.5 text-xs text-white outline-none placeholder-white/20 focus:border-cyan-400/50 transition-colors"
+                      style={{ background: "rgba(255,255,255,0.04)" }}
+                      {...field("city")}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Password */}
               <div>
-                <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wide mb-1.5">
-                  Password
-                </label>
+                <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wide mb-1.5">Password</label>
                 <div className="relative">
                   <input
                     type={showPw ? "text" : "password"}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
                     placeholder="Min. 8 characters"
                     className={`w-full rounded-xl border px-3 py-2.5 pr-9 text-xs text-white outline-none placeholder-white/20 focus:border-cyan-400/50 transition-colors ${shake ? "anim-shake" : ""}`}
                     style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.08)" }}
+                    {...field("password")}
                   />
                   <button
                     type="button"
@@ -216,25 +378,22 @@ export default function HeroSection({
               {authMode === "signup" && (
                 <>
                   <div>
-                    <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wide mb-1.5">
-                      Confirm Password
-                    </label>
+                    <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wide mb-1.5">Confirm Password</label>
                     <input
                       type={showPw ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={e => setConfirmPassword(e.target.value)}
-                      onBlur={() => { if (!passwordMatch && confirmPassword) triggerShake(); }}
                       placeholder="••••••••"
+                      onBlur={() => { if (!passwordMatch && formData?.confirmPassword) triggerShake(); }}
                       className={`w-full rounded-xl border px-3 py-2.5 text-xs text-white outline-none placeholder-white/20 transition-colors ${shake ? "anim-shake" : ""}`}
                       style={{
-                        background:  "rgba(255,255,255,0.04)",
-                        borderColor: confirmPassword && !passwordMatch
+                        background: "rgba(255,255,255,0.04)",
+                        borderColor: formData?.confirmPassword && !passwordMatch
                           ? "rgba(248,113,113,0.6)"
                           : "rgba(255,255,255,0.08)",
                       }}
+                      {...field("confirmPassword")}
                     />
                   </div>
-                  {password && confirmPassword && (
+                  {formData?.password && formData?.confirmPassword && (
                     <p className={`text-[10px] font-medium ${passwordMatch ? "text-emerald-400" : "text-red-400"}`}>
                       {passwordMatch ? "✓ Passwords match" : "✗ Passwords do not match"}
                     </p>
@@ -245,6 +404,7 @@ export default function HeroSection({
               {/* Submit */}
               <button
                 type="button"
+                onClick={handleSubmit}
                 disabled={authMode === "signup" && !passwordMatch}
                 className={`w-full mt-1 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
                   authMode === "login" || passwordMatch

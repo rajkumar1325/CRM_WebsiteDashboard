@@ -8,12 +8,17 @@ export default defineConfig({
 
   server: {
     proxy: {
-      '/api': 'http://localhost:8080',
+      // '/api': 'http://localhost:8080',
       '/regForm': 'http://localhost:8080',
       '/loginForm': 'http://localhost:8080',
       '/empLoginForm': 'http://localhost:8080',
       '/adminLoginForm': 'http://localhost:8080',
       // '/adminLoginForm': 'http://localhost:8080',
+
+      '/api': {
+        target: 'http://localhost:8080', // ← your actual backend port
+        changeOrigin: true,
+      }
     }
   }
 })

@@ -9,21 +9,84 @@ import Sun       from "./Icons/sun-light.svg?react";
 import Moon      from "./Icons/half-moon.svg?react";
 import ChatIcon  from "./Icons/chatIcon.svg?react";
 
-// ── CRMChatbot.
-// ── Topbar only controls open/close state — the panel renders itself fixed bottom-right.
 import CRMChatbot from "../components/Chatbot/CRMChatbot";
 import CRMChatbotCloudflare from "../components/Chatbot/CRMChatbotCloudflare";
-
-
 import Settings   from "../components/Settings/Settings";
 
+// ── JWT decoder (no library needed) ──────────────────────────────────────────
+// Reads token from localStorage, decodes the payload, returns user fields.
+function decodeJWT(token) {
+  try {
+    // JWT = header.payload.signature  — we only need the payload (index 1)
+    const base64Url = token.split(".")[1];
+    if (!base64Url) return null;
+
+    // base64url → base64 → JSON string
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonStr = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonStr);
+  } catch {
+    return null;
+  }
+}
+
+// ── Get initials from full name (e.g. "Raj Kumar" → "RK") ────────────────────
+function getInitials(name = "") {
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .slice(0, 2)
+    .join("");
+}
+
+// ── Read user from localStorage token ────────────────────────────────────────
+function getUserFromToken() {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+  const payload = decodeJWT(token);
+  if (!payload) return null;
+
+  // Common JWT field names — adjust if your backend uses different keys
+  const name  = payload.name  || payload.username || payload.full_name || "User";
+  const email = payload.email || payload.sub       || "";
+  const role  = payload.role  || payload.roles?.[0] || payload.user_type || "User";
+
+  return { name, email, role, initials: getInitials(name) };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
-  const navigate = useNavigate(); // initialse the hook
+  const navigate = useNavigate();
 
   const [isChatOpen,    setIsChatOpen]    = useState(false);
   const [isNotifOpen,   setIsNotifOpen]   = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+
+  // ── User state from JWT ──
+  const [user, setUser] = useState(() => getUserFromToken() ?? {
+    name: "Guest",
+    email: "",
+    role: "User",
+    initials: "G",
+  });
+
+  // Re-read token if localStorage changes (e.g. after login redirect)
+  useEffect(() => {
+    const handleStorage = () => {
+      const fresh = getUserFromToken();
+      if (fresh) setUser(fresh);
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   const notifRef   = useRef(null);
   const profileRef = useRef(null);
@@ -34,8 +97,6 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
     function handleOutsideClick(e) {
       if (notifRef.current   && !notifRef.current.contains(e.target))   setIsNotifOpen(false);
       if (profileRef.current && !profileRef.current.contains(e.target)) setIsProfileOpen(false);
-      // NOTE: Chatbot is NOT closed on outside click — it's a fixed panel.
-      // User must click ✕ inside the chatbot to close it.
     }
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
@@ -56,6 +117,12 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
     document.addEventListener("keydown", handleGlobalKeyDown);
     return () => document.removeEventListener("keydown", handleGlobalKeyDown);
   }, [handleGlobalKeyDown]);
+
+  // ── Logout handler ──
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login"); // change to your login route if different
+  };
 
   // ── Notifications data ──
   const notifications = [
@@ -84,8 +151,8 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
   const dropSub     = isDark ? "text-white/35"          : "text-gray-400";
   const unreadBg    = isDark ? "bg-white/[0.04]"        : "bg-blue-50/60";
 
-  const isMac          = typeof navigator !== "undefined" && navigator.platform.toUpperCase().includes("MAC");
-  const shortcutLabel  = isMac ? "⌘F" : "^F";
+  const isMac         = typeof navigator !== "undefined" && navigator.platform.toUpperCase().includes("MAC");
+  const shortcutLabel = isMac ? "⌘F" : "^F";
 
   // ── Reusable icon button ──
   const IconBtn = ({ onClick, children, badge, active, title }) => (
@@ -130,7 +197,6 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
             <path d="M14.5 14.5l3 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
           </svg>
 
-          {/* /// Search input is fully controlled by parent (Topbar doesn't manage its own state). */}
           <input
             ref={searchRef}
             type="text"
@@ -141,9 +207,7 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
             className={`w-full pl-9 pr-14 py-2 rounded-xl border text-sm outline-none transition-all duration-200 ${inputBg} ${inputShadow}`}
           />
 
-
-          {/* /// Shortcut hint, only visible when search is not focused */}
-          <kbd className={` 
+          <kbd className={`
             absolute right-3 top-1/2 -translate-y-1/2
             hidden sm:flex items-center gap-0.5
             px-1.5 py-0.5 rounded text-[10px] font-mono border
@@ -154,9 +218,6 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
             {shortcutLabel}
           </kbd>
         </div>
-
-
-
 
         {/* ── Right icon cluster ── */}
         <div className="flex items-center gap-1.5 shrink-0 ml-auto">
@@ -198,12 +259,7 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
             )}
           </div>
 
-
-          {/*
-            AI Chatbot trigger.
-            Click toggles the fixed glass panel rendered BELOW this Topbar (outside z-stack).
-            Active state glows when open.
-          */}
+          {/* AI Chatbot trigger */}
           <IconBtn
             onClick={() => {
               setIsChatOpen((v) => !v);
@@ -213,7 +269,6 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
             active={isChatOpen}
             title="AI Assistant"
           >
-            {/* Gradient ring when active */}
             {isChatOpen && (
               <span style={{
                 position: "absolute", inset: 0, borderRadius: 12,
@@ -235,7 +290,6 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
             }
           </IconBtn>
 
-
           {/* Settings */}
           <IconBtn onClick={() => navigate("/settings")} title="Settings">
             <Setting className={`w-5 h-5 transition-colors duration-200 ${iconColor}`} />
@@ -243,8 +297,7 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
 
           <div className={`hidden sm:block w-px h-6 mx-1 shrink-0 ${divider}`} />
 
-
-          {/* Profile dropdown */}
+          {/* ── Profile dropdown — JWT se dynamic data ── */}
           <div ref={profileRef} className="relative">
             <button
               onClick={() => { setIsProfileOpen((v) => !v); setIsNotifOpen(false); }}
@@ -257,11 +310,15 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
               `}
             >
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-[11px] font-bold shrink-0">
-                RK
+                {user.initials}
               </div>
               <div className="hidden md:flex flex-col items-start leading-tight">
-                <span className={`text-xs font-semibold ${isDark ? "text-white/85" : "text-gray-700"}`}>Raj Kumar</span>
-                <span className={`text-[10px] ${isDark ? "text-white/35" : "text-gray-400"}`}>Admin</span>
+                <span className={`text-xs font-semibold ${isDark ? "text-white/85" : "text-gray-700"}`}>
+                  {user.name}
+                </span>
+                <span className={`text-[10px] ${isDark ? "text-white/35" : "text-gray-400"}`}>
+                  {user.role}
+                </span>
               </div>
               <svg className={`w-3 h-3 hidden md:block transition-transform duration-200 ${isProfileOpen ? "rotate-180" : ""} ${isDark ? "text-white/30" : "text-gray-400"}`} fill="none" viewBox="0 0 12 12">
                 <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -271,12 +328,19 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
             {isProfileOpen && (
               <div className={`absolute top-12 right-0 w-52 rounded-2xl border shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 ${dropBg}`}>
                 <div className={`flex items-center gap-3 px-4 py-3 border-b ${isDark ? "border-white/[0.06]" : "border-gray-100"}`}>
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold shrink-0">RK</div>
-                  <div>
-                    <p className={`text-sm font-semibold ${isDark ? "text-white/90" : "text-gray-800"}`}>Raj Kumar</p>
-                    <p className={`text-[11px] ${dropSub}`}>raj@curiemcrm.com</p>
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                    {user.initials}
+                  </div>
+                  <div className="min-w-0">
+                    <p className={`text-sm font-semibold truncate ${isDark ? "text-white/90" : "text-gray-800"}`}>
+                      {user.name}
+                    </p>
+                    <p className={`text-[11px] truncate ${dropSub}`}>
+                      {user.email}
+                    </p>
                   </div>
                 </div>
+
                 {[
                   { label: "My Profile",         icon: "👤" },
                   { label: "Account Settings",   icon: "⚙️" },
@@ -288,8 +352,12 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
                     {item.label}
                   </button>
                 ))}
+
                 <div className={`border-t ${isDark ? "border-white/[0.06]" : "border-gray-100"}`}>
-                  <button className="flex items-center gap-2.5 w-full px-4 py-2.5 text-left text-sm text-rose-500 hover:bg-rose-500/10 transition-colors duration-150">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2.5 w-full px-4 py-2.5 text-left text-sm text-rose-500 hover:bg-rose-500/10 transition-colors duration-150"
+                  >
                     <span className="text-base leading-none">🚪</span>
                     Log out
                   </button>
@@ -300,20 +368,8 @@ function Topbar({ setSearch, searchPlaceHolder, isDark, setIsDark }) {
         </div>
       </div>
 
-      {/*
-        ── Chatbot glass panel ──────────────────────────────────────────────
-        Rendered OUTSIDE the topbar flex layout so it uses its own
-        fixed positioning (bottom-right desktop, fullscreen mobile).
-        Pass darkMode + onClose — the panel handles its own layout.
-      */}
+      {/* ── Chatbot glass panel ── */}
       {isChatOpen && (
-
-        // <CRMChatbot
-        //   darkMode={isDark}
-        //   onClose={() => setIsChatOpen(false)}
-        //   crmData={{ mockData, analyticsData, calendarData, dealsData, tasksData, customersData, AGENTS }}
-        // />
-
         <CRMChatbotCloudflare
           darkMode={isDark}
           onClose={() => setIsChatOpen(false)}

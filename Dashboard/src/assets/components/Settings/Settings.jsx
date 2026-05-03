@@ -189,11 +189,16 @@ function ProfileTab({ darkMode, userRole, currentUser }) { // receives currentUs
     if (file) setImgPreview(URL.createObjectURL(file)); // create a temporary URL for preview(URL.createObjectURL(file)) --> reflect it to UI
   };
 
-  const roleColors = {
-    Admin:  d ? "bg-rose-500/10 border-rose-500/20 text-rose-400"   : "bg-rose-50 border-rose-200 text-rose-600",
-    Leader: d ? "bg-amber-500/10 border-amber-500/20 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-600",
-    Member: d ? "bg-blue-500/10 border-blue-500/20 text-blue-400"   : "bg-blue-50 border-blue-200 text-blue-600",
-  };
+  // AFTER — case-insensitive key matching
+const normalizedRole = userRole?.charAt(0).toUpperCase() + userRole?.slice(1).toLowerCase(); // "ADMIN" → "Admin"
+const roleColors = {
+  Admin:  d ? "bg-rose-500/10 border-rose-500/20 text-rose-400"   : "bg-rose-50 border-rose-200 text-rose-600",
+  Leader: d ? "bg-amber-500/10 border-amber-500/20 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-600",
+  Member: d ? "bg-blue-500/10 border-blue-500/20 text-blue-400"   : "bg-blue-50 border-blue-200 text-blue-600",
+};
+
+<span className={`... ${roleColors[normalizedRole]}`}>{normalizedRole}</span>
+
 
   return (
     <div className="flex flex-col gap-5">
@@ -1316,7 +1321,10 @@ export default function Settings({ darkMode: darkProp, isDark, setIsDark, userRo
     { id:"appearance",    label:"Appearance",        icon:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M4.93 4.93l1.41 1.41M18.66 18.66l1.41 1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg> },
   ];
 
-  const visibleTabs = TABS.filter(t => !t.adminOnly || userRole === "Admin");
+  const visibleTabs = TABS.filter(t => !t.adminOnly || 
+  userRole?.toLowerCase() === "admin"  // "ADMIN" aur "Admin" dono handle
+);
+
   const initials = currentUser?.initials ?? (currentUser?.name?.split(" ").map(n=>n[0]).join("") ?? "RK");
 
   return (

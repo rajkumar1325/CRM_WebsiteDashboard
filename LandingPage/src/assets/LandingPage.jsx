@@ -12,13 +12,20 @@ import FAQSection          from "./sections/FAQSection";
 import CTASection          from "./sections/CTASection";
 import FooterSection       from "./sections/FooterSection";
 
+import { useNavigate } from "react-router-dom";
+
+
+
 export default function LandingPage() {
+  const navigate = useNavigate();
 
   // ── Auth card UI state ─────────────────────────────────────────────────────
   const [authMode, setAuthMode]           = useState("signup"); // "signup" | "login"
   const [authHighlight, setAuthHighlight] = useState(false);
   const authCardRef                       = useRef(null);
   const [selectedRole, setSelectedRole]   = useState(null);    // "admin" | "employee" | "customer"
+
+
 
   // ── Form state ─────────────────────────────────────────────────────────────
   const [formData, setFormData] = useState({
@@ -111,10 +118,16 @@ export default function LandingPage() {
       setAuthStatus("success");
 
       // Redirect after short delay so user sees the success state on button
+      // setTimeout(() => {
+      //   if (role === "admin")         window.location.href = "/adminProfile";
+      //   else if (role === "employee") window.location.href = "/employeeManagement";
+      //   else                          window.location.href = "/home";
+      // }, 1200);
+
       setTimeout(() => {
-        if (role === "admin")         window.location.href = "/adminProfile";
-        else if (role === "employee") window.location.href = "/employeeManagement";
-        else                          window.location.href = "/home";
+        if (role === "admin")         navigate("/dashboard");
+        else if (role === "employee") navigate("/dashboard");
+        else                          navigate("/dashboard/projects");
       }, 1200);
 
     } catch (err) {

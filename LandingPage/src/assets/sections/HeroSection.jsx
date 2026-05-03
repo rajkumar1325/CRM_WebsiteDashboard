@@ -3,7 +3,7 @@ import { Icon } from "../shared/Icons";
 
 const ROLES = [
   {
-    key: "admin",
+    key: "ADMIN",
     label: "Admin",
     color: "#f87171",
     tip: "Full org access, users & billing",
@@ -11,7 +11,7 @@ const ROLES = [
     signupEndpoint: "/api/auth/register",
   },
   {
-    key: "employee",
+    key: "EMPLOYEE",
     label: "Employee",
     color: "#fbbf24",
     tip: "Team tasks, inquiries & sales",
@@ -19,7 +19,7 @@ const ROLES = [
     signupEndpoint: "/api/auth/signup",
   },
   {
-    key: "customer",
+    key: "CUSTOMER",
     label: "Customer",
     color: "#34d399",
     tip: "Browse courses, inquiries & feedback",

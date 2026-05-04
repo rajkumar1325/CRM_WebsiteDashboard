@@ -203,9 +203,15 @@ function StatCard({ icon: Icon, label, value, accent, darkMode, sub }) {
   );
 }
 
-// ─── Avatar initials ───────────────────────────────────────────────────────────
-function Avatar({ name, id, size = 40, radius = 12 }) {
-  const hue = (id.charCodeAt(id.length - 1) * 47) % 360;
+// ─── Avatar initials ────────────────────────────────────────────────────────
+function Avatar({ name = "", id = "", size = 40, radius = 12 }) {
+  // Force values to be strings to prevent .charCodeAt and .split crashes
+  const safeId = String(id || "0");
+  const safeName = String(name || "?");
+  
+  const hue = safeId ? (safeId.charCodeAt(safeId.length - 1) * 47) % 360 : 0;
+  const initials = safeName.split(" ").map(n => n?.[0] || "").join("").slice(0,2).toUpperCase();
+
   return (
     <div style={{
       width: size, height: size, borderRadius: radius,
@@ -216,7 +222,7 @@ function Avatar({ name, id, size = 40, radius = 12 }) {
       fontSize: size * 0.3, fontWeight: 700, flexShrink: 0,
       boxShadow: `0 2px 10px hsla(${hue},55%,22%,0.4)`,
     }}>
-      {name.split(" ").map(n => n[0]).join("").slice(0,2).toUpperCase()}
+      {initials}
     </div>
   );
 }
@@ -268,7 +274,16 @@ function MemberModal({ member, darkMode, onClose, onEdit }) {
     { icon: Phone,        label: "Phone",       value: member.phone,       accent: "#34d399" },
     { icon: Briefcase,    label: "Department",  value: member.department,  accent: "#fb923c" },
     { icon: Star,         label: "Designation", value: member.designation, accent: "#f472b6" },
-    { icon: FolderKanban, label: "Projects",    value: member.projects.join(", ") || "None", accent: "#38bdf8" },
+    // { icon: FolderKanban, label: "Projects",    value: member.projects.join(", ") || "None", accent: "#38bdf8" },
+
+    { 
+  icon: FolderKanban, 
+  label: "Projects",    
+  value: Array.isArray(member.projects) ? member.projects.join(", ") : (member.projects || "None"), 
+  accent: "#38bdf8" 
+},
+
+
     { icon: BarChart2,    label: "Active Tasks",value: `${member.tasks} tasks`, accent: "#a78bfa" },
     { icon: Clock,        label: "Joined",      value: member.joinDate,    accent: "#fbbf24" },
   ];
@@ -343,7 +358,7 @@ function MemberModal({ member, darkMode, onClose, onEdit }) {
           <div className="flex gap-2">
             <button onClick={onClose}
               className="px-4 py-2 rounded-xl text-sm font-semibold border transition-all duration-200"
-              style={{ background: "transparent", borderColor, color: textMuted }}>
+              style={{ background: "transparent", borderColor:borderCol, color: textMuted }}>
               Close
             </button>
             <button onClick={() => { onClose(); onEdit(member); }}
